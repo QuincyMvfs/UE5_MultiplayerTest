@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayPlayerController.generated.h"
 
+class UInputAction;
+class UInputMappingContext;
 class AGameplayActor;
 /**
  * 
@@ -15,19 +17,58 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+	// Input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputMappingContext* M_MovementMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputMappingContext* M_CombatMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_MovementInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_LookInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_JumpInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_CrouchInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_SprintInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_ShootInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_AimInputAction;
+
 public:
 	AGameplayPlayerController();
 
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintCallable)
-	void MoveForward(float Value);
+	void Move(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
-	void MoveRight(float Value);
+	void Look(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void Crouch(const FInputActionValue& Value);
 
-	AGameplayActor* M_PossesedPawn;
+	UFUNCTION(BlueprintCallable)
+	void Run(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void Shoot(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void Aim(const FInputActionValue& Value);
+	
+	FVector2d M_MovementVector;
+	AGameplayActor* M_PossessedPawn;
 };

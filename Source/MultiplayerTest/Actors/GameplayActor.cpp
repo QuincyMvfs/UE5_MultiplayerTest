@@ -7,6 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AGameplayActor::AGameplayActor()
@@ -23,8 +26,10 @@ AGameplayActor::AGameplayActor()
 
 	// Camera
 	M_CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
+	M_CameraSpringArm->SetupAttachment(M_PlayerCapsuleComponent);
 	M_PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	M_PlayerCamera->SetupAttachment(M_CameraSpringArm);
+	M_PlayerCamera-> bUsePawnControlRotation = true;
 	
 }
 
@@ -34,7 +39,6 @@ void AGameplayActor::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
 // Called every frame
 void AGameplayActor::Tick(float DeltaTime)
 {
@@ -42,10 +46,71 @@ void AGameplayActor::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
-void AGameplayActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AGameplayActor::SetPlayerMovementVector(FVector2d Value)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	m_movementVector = Value;
 }
 
+void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming,
+	float& CurrentSpeed, FVector &CurrentVelocity)
+{
+	bIsAiming = m_isAiming;
+	bIsFalling = M_PlayerMovement->IsFalling();
+	CurrentSpeed = GetVelocity().Size();
+	CurrentVelocity = GetVelocity();
+	
+}
+
+// CROUCHING
+void AGameplayActor::SetCrouching(bool Value)
+{
+	if (Value)
+	{
+		m_isCrouching = true;
+		UE_LOG(LogTemp, Warning, TEXT("Crouched"))
+	}
+	else
+	{
+		m_isCrouching = false;
+		UE_LOG(LogTemp, Warning, TEXT("Standing"))
+	}
+}
+
+// RUNNING
+void AGameplayActor::SetRunning(bool Value)
+{
+	if (Value)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sprint"))
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Stop Sprinting"))
+	}
+}
+
+// SHOOTING
+void AGameplayActor::SetShooting(bool Value)
+{
+	if (Value)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Shooting"))
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Stop Shooting"))
+	}
+}
+
+// AIMING
+void AGameplayActor::SetAiming(bool Value)
+{
+	if (Value)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Aiming"))
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Aiming"))
+	}
+}

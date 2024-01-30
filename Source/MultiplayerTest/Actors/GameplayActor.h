@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UInputAction;
+class UInputMappingContext;
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -13,25 +15,29 @@ UCLASS()
 class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere)
+
+	// Viewport Components
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UCapsuleComponent* M_PlayerCapsuleComponent;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* M_PlayerModelSKC;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* M_WeaponSKC;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UArrowComponent* M_PlayerArrowComponent;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UCharacterMovementComponent* M_PlayerMovement;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UCameraComponent* M_PlayerCamera;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	USpringArmComponent* M_CameraSpringArm;
-
+	
 public:
 	// Sets default values for this character's properties
 	AGameplayActor();
@@ -44,9 +50,31 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void SetPlayerMovementVector(FVector2d Value);
 
-	// Skeletal Mesh Component
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetAnimationVariables(bool &bIsFalling_out, bool &bIsAiming_out,
+		float &CurrentSpeed_out, FVector &CurrentVelocity_out);
 
+	UFUNCTION()
+	void SetCrouching(bool Value);
+
+	UFUNCTION()
+	void SetRunning(bool Value);
+
+	UFUNCTION()
+	void SetShooting(bool Value);
+
+	UFUNCTION()
+	void SetAiming(bool Value);
+
+private:
+	FVector2d m_movementVector;
+
+	// Bools
+	bool m_isAiming;
+	bool m_isShooting;
+	bool m_isCrouching;
+	bool m_isRunning;
+	bool m_isSprinting;
 };
