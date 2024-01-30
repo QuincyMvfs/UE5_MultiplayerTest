@@ -38,7 +38,7 @@ void AGameplayPlayerController::SetupInputComponent()
 			// Movement
 			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Move);
 			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Look);
-			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered, M_PossessedPawn, &ACharacter::Jump);
+			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered, M_PossessedPawn, &AGameplayActor::TryJump);
 
 			// Crouching
 			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Crouch);

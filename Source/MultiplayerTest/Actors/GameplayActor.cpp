@@ -60,21 +60,29 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	bIsShooting = m_isShooting;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
-	
+	CurrentState = m_currentState;
 	
 }
 
 // CROUCHING
 void AGameplayActor::SetCrouching(bool Value)
 {
-	if (Value)
+	if (m_currentState == EMovementStates::Running
+		|| m_currentState == EMovementStates::Sprinting
+		|| m_currentState == EMovementStates::Jumping)
+	{
+		// Do nothing
+	}
+	else if (Value)
 	{
 		m_currentState = EMovementStates::Crouching;
+		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("Crouched"))
 	}
-	else
+	else if (!Value)
 	{
 		m_currentState = EMovementStates::Idle;
+		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("Standing"))
 	}
 }
@@ -82,17 +90,25 @@ void AGameplayActor::SetCrouching(bool Value)
 // RUNNING
 void AGameplayActor::SetRunning(bool Value)
 {
-	if (Value)
+	FTimerHandle SprintDelay;
+	
+	if (Value && !m_isAiming)
 	{
 		m_currentState = EMovementStates::Running;
-		
-		UE_LOG(LogTemp, Warning, TEXT("Sprint"))
+		M_PlayerMovement->MaxWalkSpeed = M_RunSpeed;
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				SprintDelay, this, &AGameplayActor::SetSprintingTrue, M_DelayTillSprinting);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Start Running"))
 	}
-	else
+	else if (!Value && !m_isAiming)
 	{
 		m_currentState = EMovementStates::Idle;
-
-		UE_LOG(LogTemp, Warning, TEXT("Stop Sprinting"))
+		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
+		SprintDelay.Invalidate();
+		UE_LOG(LogTemp, Warning, TEXT("Stop Running"))
 	}
 }
 
@@ -114,10 +130,33 @@ void AGameplayActor::SetAiming(bool Value)
 {
 	if (Value)
 	{
+		m_isAiming = true;
+		M_PlayerMovement->MaxWalkSpeed = M_AimingWalkingSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("Aiming"))
 	}
 	else
 	{
+		m_isAiming = false;
+		if (m_currentState != EMovementStates::Crouching){  M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 		UE_LOG(LogTemp, Warning, TEXT("Not Aiming"))
+	}
+}
+
+void AGameplayActor::SetSprintingTrue()
+{
+	if (m_currentState == EMovementStates::Running && !m_isAiming)
+	{
+		m_currentState = EMovementStates::Sprinting;
+		M_PlayerMovement->MaxWalkSpeed = M_SprintSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("Start Sprinting"))
+	}
+}
+
+void AGameplayActor::TryJump()
+{
+	if (!m_isAiming && m_currentState != EMovementStates::Jumping
+		&& m_currentState != EMovementStates::Crouching)
+	{
+		ACharacter::Jump();
 	}
 }

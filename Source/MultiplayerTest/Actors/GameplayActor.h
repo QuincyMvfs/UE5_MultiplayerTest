@@ -69,6 +69,31 @@ public:
 	UFUNCTION()
 	void SetAiming(bool Value);
 
+	UFUNCTION()
+	void SetSprintingTrue();
+
+	UFUNCTION()
+	void TryJump();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_DelayTillSprinting = 1.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_CrouchSpeed = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_WalkSpeed = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_RunSpeed = 600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_SprintSpeed = 900.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_AimingWalkingSpeed = 200.0f;
+	
 private:
 	FVector2d m_movementVector;
 
