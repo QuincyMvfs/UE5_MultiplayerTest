@@ -6,10 +6,31 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+
 UCLASS()
 class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	UCapsuleComponent* M_PlayerCapsuleComponent;
+	
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* M_PlayerModelSKC;
+
+	UPROPERTY(EditAnywhere)
+	UArrowComponent* M_PlayerArrowComponent;
+	
+	UPROPERTY(EditAnywhere)
+	UCharacterMovementComponent* M_PlayerMovement;
+
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* M_PlayerCamera;
+
+	UPROPERTY(EditAnywhere)
+	USpringArmComponent* M_CameraSpringArm;
 
 public:
 	// Sets default values for this character's properties
@@ -25,5 +46,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// Skeletal Mesh Component
 
 };

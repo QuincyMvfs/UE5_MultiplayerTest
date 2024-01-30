@@ -13,5 +13,7 @@ UCLASS()
 class MULTIPLAYERTEST_API AMultiplayerTestGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	AMultiplayerTestGameModeBase();
 };
