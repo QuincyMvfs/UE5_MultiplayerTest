@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "MultiplayerTest/EMovementStates.h"
 
 // Sets default values
 AGameplayActor::AGameplayActor()
@@ -51,13 +52,15 @@ void AGameplayActor::SetPlayerMovementVector(FVector2d Value)
 	m_movementVector = Value;
 }
 
-void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming,
-	float& CurrentSpeed, FVector &CurrentVelocity)
+void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting,
+	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState)
 {
-	bIsAiming = m_isAiming;
 	bIsFalling = M_PlayerMovement->IsFalling();
+	bIsAiming = m_isAiming;
+	bIsShooting = m_isShooting;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
+	
 	
 }
 
@@ -66,12 +69,12 @@ void AGameplayActor::SetCrouching(bool Value)
 {
 	if (Value)
 	{
-		m_isCrouching = true;
+		m_currentState = EMovementStates::Crouching;
 		UE_LOG(LogTemp, Warning, TEXT("Crouched"))
 	}
 	else
 	{
-		m_isCrouching = false;
+		m_currentState = EMovementStates::Idle;
 		UE_LOG(LogTemp, Warning, TEXT("Standing"))
 	}
 }
@@ -81,10 +84,14 @@ void AGameplayActor::SetRunning(bool Value)
 {
 	if (Value)
 	{
+		m_currentState = EMovementStates::Running;
+		
 		UE_LOG(LogTemp, Warning, TEXT("Sprint"))
 	}
 	else
 	{
+		m_currentState = EMovementStates::Idle;
+
 		UE_LOG(LogTemp, Warning, TEXT("Stop Sprinting"))
 	}
 }

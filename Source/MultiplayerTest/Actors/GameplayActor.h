@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+enum class EMovementStates : uint8;
 class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
@@ -53,8 +54,8 @@ public:
 	void SetPlayerMovementVector(FVector2d Value);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	void GetAnimationVariables(bool &bIsFalling_out, bool &bIsAiming_out,
-		float &CurrentSpeed_out, FVector &CurrentVelocity_out);
+	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting,
+	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
 
 	UFUNCTION()
 	void SetCrouching(bool Value);
@@ -72,9 +73,7 @@ private:
 	FVector2d m_movementVector;
 
 	// Bools
+	EMovementStates m_currentState;
 	bool m_isAiming;
 	bool m_isShooting;
-	bool m_isCrouching;
-	bool m_isRunning;
-	bool m_isSprinting;
 };
