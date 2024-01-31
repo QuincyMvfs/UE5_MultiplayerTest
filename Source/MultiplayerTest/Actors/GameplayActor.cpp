@@ -47,11 +47,13 @@ void AGameplayActor::Tick(float DeltaTime)
 
 }
 
+// FORCIBLY SETS THE PLAYERS MOVEMENT VECTOR
 void AGameplayActor::SetPlayerMovementVector(FVector2d Value)
 {
 	m_movementVector = Value;
 }
 
+// GETS THE VARIABLES USED BY THE ABP
 void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState)
 {
@@ -137,6 +139,7 @@ void AGameplayActor::SetAiming(bool Value)
 	}
 }
 
+// MAKES THE PLAYER BEGIN SPRINTING
 void AGameplayActor::SetSprintingTrue()
 {
 	if (m_currentState == EMovementStates::Running && !m_isAiming)
@@ -146,6 +149,7 @@ void AGameplayActor::SetSprintingTrue()
 	}
 }
 
+// JUMP
 void AGameplayActor::TryJump()
 {
 	if (!m_isAiming && m_currentState != EMovementStates::Jumping
@@ -154,6 +158,7 @@ void AGameplayActor::TryJump()
 		ACharacter::Jump();
 	}
 }
+
 
 void AGameplayActor::TryReload()
 {
