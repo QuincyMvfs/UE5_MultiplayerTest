@@ -52,12 +52,13 @@ void AGameplayActor::SetPlayerMovementVector(FVector2d Value)
 	m_movementVector = Value;
 }
 
-void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting,
+void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState)
 {
 	bIsFalling = M_PlayerMovement->IsFalling();
 	bIsAiming = m_isAiming;
 	bIsShooting = m_isShooting;
+	bisReloading = m_isReloading;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
 	CurrentState = m_currentState;
@@ -159,4 +160,20 @@ void AGameplayActor::TryJump()
 	{
 		ACharacter::Jump();
 	}
+}
+
+void AGameplayActor::TryReload()
+{
+	if (!m_isReloading)
+	{
+		m_isReloading = true;
+		FTimerHandle ReloadTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			ReloadTimer, this, &AGameplayActor::Reload, M_ReloadSpeed);
+	}
+}
+
+void AGameplayActor::Reload()
+{
+	m_isReloading = false;
 }

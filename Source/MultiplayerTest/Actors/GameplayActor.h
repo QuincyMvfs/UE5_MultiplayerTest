@@ -54,7 +54,7 @@ public:
 	void SetPlayerMovementVector(FVector2d Value);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting,
+	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
 
 	UFUNCTION()
@@ -75,7 +75,16 @@ public:
 	UFUNCTION()
 	void TryJump();
 
+	UFUNCTION()
+	void TryReload();
+
+	UFUNCTION()
+	void Reload();
+
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float M_ReloadSpeed = 1.2f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float M_DelayTillSprinting = 1.2f;
 
@@ -101,4 +110,5 @@ private:
 	EMovementStates m_currentState;
 	bool m_isAiming;
 	bool m_isShooting;
+	bool m_isReloading;
 };

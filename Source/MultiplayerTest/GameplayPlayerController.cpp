@@ -55,6 +55,14 @@ void AGameplayPlayerController::SetupInputComponent()
 			// Aiming
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
+
+			// Aiming
+			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
+			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
+
+			// Reloading
+			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, M_PossessedPawn, &AGameplayActor::TryReload);
+			// EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Completed, M_PossessedPawn, &AGameplayActor::TryReload);
 		}
 	}
 }

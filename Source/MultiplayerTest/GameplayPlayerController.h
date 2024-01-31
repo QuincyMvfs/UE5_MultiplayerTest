@@ -45,6 +45,9 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_AimInputAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_ReloadInputAction;
+
 public:
 	AGameplayPlayerController();
 
