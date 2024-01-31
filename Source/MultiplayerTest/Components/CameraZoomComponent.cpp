@@ -60,7 +60,6 @@ void UCameraZoomComponent::CameraZoomIn()
 	{
 		m_currentZoomFOV -= M_ZoomRate;
 		m_cameraComponent->SetFieldOfView(m_currentZoomFOV);
-		UE_LOG(LogTemp, Warning, TEXT("Zoom In: %f"), m_currentZoomFOV);
 		GetWorld()->GetTimerManager().SetTimer(
 				ZoomInTimer, this, &UCameraZoomComponent::CameraZoomIn, m_timerPlayRate);
 	}
@@ -74,7 +73,6 @@ void UCameraZoomComponent::CameraZoomOut()
 	{
 		m_currentZoomFOV += M_ZoomRate;
 		m_cameraComponent->SetFieldOfView(m_currentZoomFOV);
-		UE_LOG(LogTemp, Warning, TEXT("Zoom Out: %f"), m_currentZoomFOV);
 		GetWorld()->GetTimerManager().SetTimer(
 				ZoomOutTimer, this, &UCameraZoomComponent::CameraZoomOut, m_timerPlayRate);
 	}
