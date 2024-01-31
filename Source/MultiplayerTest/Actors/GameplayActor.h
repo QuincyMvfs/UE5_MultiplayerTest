@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UBaseWeaponComponent;
 enum class EMovementStates : uint8;
 class UInputAction;
 class UInputMappingContext;
@@ -25,7 +26,7 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 	USkeletalMeshComponent* M_PlayerModelSKC;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
-	USkeletalMeshComponent* M_WeaponSKC;
+	USkeletalMeshComponent* M_WeaponModelSKC;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UArrowComponent* M_PlayerArrowComponent;
@@ -38,6 +39,9 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	USpringArmComponent* M_CameraSpringArm;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	UBaseWeaponComponent* M_WeaponComponent;
 	
 public:
 	// Sets default values for this character's properties
@@ -74,9 +78,6 @@ public:
 
 	UFUNCTION()
 	void TryJump();
-
-	UFUNCTION()
-	void TryReload();
 
 	UFUNCTION()
 	void Reload();

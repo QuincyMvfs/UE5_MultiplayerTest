@@ -7,6 +7,8 @@
 #include "BaseWeaponComponent.generated.h"
 
 
+class UCameraComponent;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UBaseWeaponComponent : public UActorComponent
 {
@@ -24,9 +26,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual bool TryShootWeapon(UCameraComponent* cameraComponent, AActor* shooter);
+	virtual bool TryShootWeapon();
 	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter);
-	virtual bool TryReload();
+	virtual void TryReload();
 	virtual void Reload();
 
 public:
@@ -49,6 +51,8 @@ protected:
 protected:
 	int m_currentMagazine;
 	float m_nextTimeToShoot;
+	float m_rayLength = 1000.0f;
 	bool m_isReloading;
 	bool m_canFire;
+	
 };

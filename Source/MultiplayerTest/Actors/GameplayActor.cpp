@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
+#include "MultiplayerTest/Components/BaseWeaponComponent.h"
 
 // Sets default values
 AGameplayActor::AGameplayActor()
@@ -22,6 +23,7 @@ AGameplayActor::AGameplayActor()
 	M_PlayerCapsuleComponent = GetCapsuleComponent();
 	M_PlayerCapsuleComponent->InitCapsuleSize(55.0f, 96.0f);
 	M_PlayerModelSKC = GetMesh();
+	M_WeaponModelSKC = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponSKC"));
 	M_PlayerArrowComponent = GetArrowComponent();
 	M_PlayerMovement = GetCharacterMovement();
 
@@ -32,6 +34,7 @@ AGameplayActor::AGameplayActor()
 	M_PlayerCamera->SetupAttachment(M_CameraSpringArm);
 	M_PlayerCamera-> bUsePawnControlRotation = true;
 	
+	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));
 }
 
 // Called when the game starts or when spawned
@@ -116,6 +119,7 @@ void AGameplayActor::SetShooting(bool Value)
 {
 	if (Value)
 	{
+		M_WeaponComponent->ShootWeapon(M_PlayerCamera, this);
 		UE_LOG(LogTemp, Warning, TEXT("Shooting"))
 	}
 	else
@@ -159,21 +163,7 @@ void AGameplayActor::TryJump()
 	}
 }
 
-
-void AGameplayActor::TryReload()
-{
-	if (!m_isReloading)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Reload Started"))
-		m_isReloading = true;
-		FTimerHandle ReloadTimer;
-		GetWorld()->GetTimerManager().SetTimer(
-			ReloadTimer, this, &AGameplayActor::Reload, M_ReloadSpeed);
-	}
-}
-
 void AGameplayActor::Reload()
 {
-	m_isReloading = false;
-	UE_LOG(LogTemp, Warning, TEXT("Reload Ended"))
+	M_WeaponComponent->TryReload();
 }

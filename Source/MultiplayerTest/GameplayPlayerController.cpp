@@ -49,19 +49,19 @@ void AGameplayPlayerController::SetupInputComponent()
 			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Run);
 
 			// Shooting
-			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Shoot);
+			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Shoot);
 			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Shoot);
 			
 			// Aiming
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
 
-			// Aiming
-			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
-			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
+			// // Aiming
+			// EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
+			// EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
 
 			// Reloading
-			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, M_PossessedPawn, &AGameplayActor::TryReload);
+			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, M_PossessedPawn, &AGameplayActor::Reload);
 			// EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Completed, M_PossessedPawn, &AGameplayActor::TryReload);
 		}
 	}
