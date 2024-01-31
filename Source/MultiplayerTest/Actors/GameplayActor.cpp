@@ -132,9 +132,11 @@ void AGameplayActor::SetShooting(bool Value)
 	if (Value)
 	{
 		M_WeaponComponent->ShootWeapon(M_PlayerCamera, this);
+		if (!m_isShooting) m_isShooting = true;
 	}
 	else
 	{
+		m_isShooting = false;
 	}
 }
 

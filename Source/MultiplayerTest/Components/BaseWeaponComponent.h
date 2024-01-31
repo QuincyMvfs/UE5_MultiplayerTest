@@ -7,6 +7,7 @@
 #include "BaseWeaponComponent.generated.h"
 
 
+class AGrenadeProjectile;
 class UCameraComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -46,6 +47,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base Weapon Variables")
 	bool M_IsReloading;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
+	TSubclassOf<class AActor> M_GrenadeActor;
+	
 protected:
 	virtual void PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
 

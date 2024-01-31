@@ -6,6 +6,7 @@
 #include "HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MultiplayerTest/Actors/GrenadeProjectile.h"
 
 // Sets default values for this component's properties
 UBaseWeaponComponent::UBaseWeaponComponent()
@@ -49,11 +50,13 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
 		m_currentMagazine--;
 
-		UE_LOG(LogTemp, Warning, TEXT("SHOOT"));
 		const FVector startPoint = cameraComponent->GetComponentLocation();
 		const FVector forwardVector = cameraComponent->GetForwardVector();
 		const FVector endPoint = startPoint + (forwardVector * m_rayLength);
 		PerformRaycast(startPoint, endPoint, shooter);
+		FActorSpawnParameters spawnParams;
+		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor, startPoint, shooter->GetActorRotation(), spawnParams);
+
 	}
 }
 
@@ -61,7 +64,6 @@ void UBaseWeaponComponent::TryReload()
 {
 	if (m_currentMagazine < M_MaxMagazineCapacity && !M_IsReloading)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("START RELOAD"));
 		M_IsReloading = true;
 		FTimerHandle ReloadTimer;
 		GetWorld()->GetTimerManager().SetTimer(
@@ -72,7 +74,6 @@ void UBaseWeaponComponent::TryReload()
 
 void UBaseWeaponComponent::Reload()
 {
-	UE_LOG(LogTemp, Warning, TEXT("FINISH RELOAD"));
 	M_IsReloading = false;
 	m_currentMagazine = M_MaxMagazineCapacity;
 }
