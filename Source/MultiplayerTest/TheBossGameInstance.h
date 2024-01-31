@@ -22,5 +22,5 @@ public:
 	float MouseSensitivity = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Settings")
-	float ScopedMouseSensitivity = 0.5f;
+	float ScopedMouseSensitivity = 0.35f;
 };

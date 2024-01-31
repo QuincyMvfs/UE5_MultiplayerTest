@@ -5,6 +5,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
 
 AGameplayPlayerController::AGameplayPlayerController()
@@ -15,7 +16,8 @@ AGameplayPlayerController::AGameplayPlayerController()
 void AGameplayPlayerController::BeginPlay()
 {
 	M_PossessedPawn = Cast<AGameplayActor>(GetPawn());
-
+	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
+	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
@@ -85,8 +87,16 @@ void AGameplayPlayerController::Look(const FInputActionValue& Value)
 
 	if (M_PossessedPawn)
 	{
-		M_PossessedPawn->AddControllerYawInput(LookAxisVector.X * -1);
-		M_PossessedPawn->AddControllerPitchInput(LookAxisVector.Y);
+		if (M_PossessedPawn->M_IsAiming && M_GameInstanceRef)
+		{
+			M_PossessedPawn->AddControllerYawInput(LookAxisVector.X * M_GameInstanceRef->ScopedMouseSensitivity);
+			M_PossessedPawn->AddControllerPitchInput(LookAxisVector.Y * M_GameInstanceRef->ScopedMouseSensitivity);
+		}
+		else if (M_GameInstanceRef)
+		{
+			M_PossessedPawn->AddControllerYawInput(LookAxisVector.X * M_GameInstanceRef->MouseSensitivity);
+			M_PossessedPawn->AddControllerPitchInput(LookAxisVector.Y * M_GameInstanceRef->MouseSensitivity);
+		}
 	}
 }
 

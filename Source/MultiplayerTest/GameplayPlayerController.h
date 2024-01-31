@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayPlayerController.generated.h"
 
+class UTheBossGameInstance;
 class UInputAction;
 class UInputMappingContext;
 class AGameplayActor;
@@ -74,4 +75,5 @@ public:
 	
 	FVector2d M_MovementVector;
 	AGameplayActor* M_PossessedPawn;
+	UTheBossGameInstance* M_GameInstanceRef;
 };

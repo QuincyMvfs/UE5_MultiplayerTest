@@ -107,12 +107,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_AimingWalkingSpeed = 200.0f;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool M_IsAiming;
 private:
 	FVector2d m_movementVector;
 
 	// Bools
 	EMovementStates m_currentState;
-	bool m_isAiming;
 	bool m_isShooting;
 };

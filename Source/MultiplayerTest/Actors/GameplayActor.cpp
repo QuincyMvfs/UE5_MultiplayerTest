@@ -70,7 +70,7 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState)
 {
 	bIsFalling = M_PlayerMovement->IsFalling();
-	bIsAiming = m_isAiming;
+	bIsAiming = M_IsAiming;
 	bIsShooting = m_isShooting;
 	bisReloading = M_WeaponComponent->M_IsReloading;
 	CurrentSpeed = GetVelocity().Size();
@@ -108,7 +108,7 @@ void AGameplayActor::SetRunning(bool Value)
 {
 	FTimerHandle SprintDelay;
 	
-	if (Value && !m_isAiming)
+	if (Value && !M_IsAiming)
 	{
 		m_currentState = EMovementStates::Running;
 		M_PlayerMovement->MaxWalkSpeed = M_RunSpeed;
@@ -118,7 +118,7 @@ void AGameplayActor::SetRunning(bool Value)
 				SprintDelay, this, &AGameplayActor::SetSprintingTrue, M_DelayTillSprinting);
 		}
 	}
-	else if (!Value && !m_isAiming)
+	else if (!Value && !M_IsAiming)
 	{
 		m_currentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
@@ -143,13 +143,13 @@ void AGameplayActor::SetAiming(bool Value)
 {
 	if (Value)
 	{
-		m_isAiming = true;
+		M_IsAiming = true;
 		M_PlayerMovement->MaxWalkSpeed = M_AimingWalkingSpeed;
 		M_CameraZoomComponent->ZoomCamera(true);
 	}
 	else
 	{
-		m_isAiming = false;
+		M_IsAiming = false;
 		if (m_currentState != EMovementStates::Crouching){  M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 		M_CameraZoomComponent->ZoomCamera(false);
 
@@ -159,7 +159,7 @@ void AGameplayActor::SetAiming(bool Value)
 // MAKES THE PLAYER BEGIN SPRINTING
 void AGameplayActor::SetSprintingTrue()
 {
-	if (m_currentState == EMovementStates::Running && !m_isAiming)
+	if (m_currentState == EMovementStates::Running && !M_IsAiming)
 	{
 		m_currentState = EMovementStates::Sprinting;
 		M_PlayerMovement->MaxWalkSpeed = M_SprintSpeed;
@@ -169,7 +169,7 @@ void AGameplayActor::SetSprintingTrue()
 // JUMP
 void AGameplayActor::TryJump()
 {
-	if (!m_isAiming && m_currentState != EMovementStates::Jumping
+	if (!M_IsAiming && m_currentState != EMovementStates::Jumping
 		&& m_currentState != EMovementStates::Crouching)
 	{
 		ACharacter::Jump();
