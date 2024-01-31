@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
+#include "MultiplayerTest/Components/CameraZoomComponent.h"
 
 // Sets default values
 AGameplayActor::AGameplayActor()
@@ -19,11 +20,16 @@ AGameplayActor::AGameplayActor()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Capsule + Mesh + Movement
+	// Capsule
 	M_PlayerCapsuleComponent = GetCapsuleComponent();
 	M_PlayerCapsuleComponent->InitCapsuleSize(55.0f, 96.0f);
+
+	// Skeletal Meshs
 	M_PlayerModelSKC = GetMesh();
 	M_WeaponModelSKC = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponSKC"));
+	M_WeaponModelSKC->SetupAttachment(M_PlayerModelSKC, "RightHand");
+
+	// ETC
 	M_PlayerArrowComponent = GetArrowComponent();
 	M_PlayerMovement = GetCharacterMovement();
 
@@ -33,8 +39,11 @@ AGameplayActor::AGameplayActor()
 	M_PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	M_PlayerCamera->SetupAttachment(M_CameraSpringArm);
 	M_PlayerCamera-> bUsePawnControlRotation = true;
-	
+
+	// Custom Classes
 	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));
+	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
+	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera);
 }
 
 // Called when the game starts or when spawned
@@ -135,11 +144,14 @@ void AGameplayActor::SetAiming(bool Value)
 	{
 		m_isAiming = true;
 		M_PlayerMovement->MaxWalkSpeed = M_AimingWalkingSpeed;
+		M_CameraZoomComponent->ZoomCamera(true);
 	}
 	else
 	{
 		m_isAiming = false;
 		if (m_currentState != EMovementStates::Crouching){  M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
+		M_CameraZoomComponent->ZoomCamera(false);
+
 	}
 }
 

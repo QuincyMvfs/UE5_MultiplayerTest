@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UCameraZoomComponent;
 class UBaseWeaponComponent;
 enum class EMovementStates : uint8;
 class UInputAction;
@@ -42,6 +43,9 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UBaseWeaponComponent* M_WeaponComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	UCameraZoomComponent* M_CameraZoomComponent;
 	
 public:
 	// Sets default values for this character's properties
