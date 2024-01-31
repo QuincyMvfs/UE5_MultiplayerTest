@@ -43,7 +43,7 @@ AGameplayActor::AGameplayActor()
 	// Custom Classes
 	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));
 	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
-	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera);
+	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
 }
 
 // Called when the game starts or when spawned
@@ -72,7 +72,7 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	bIsFalling = M_PlayerMovement->IsFalling();
 	bIsAiming = m_isAiming;
 	bIsShooting = m_isShooting;
-	bisReloading = m_isReloading;
+	bisReloading = M_WeaponComponent->M_IsReloading;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
 	CurrentState = m_currentState;
@@ -92,11 +92,14 @@ void AGameplayActor::SetCrouching(bool Value)
 	{
 		m_currentState = EMovementStates::Crouching;
 		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
+		M_CameraZoomComponent->CrouchWithCamera(true);
 	}
 	else if (!Value)
 	{
 		m_currentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
+		M_CameraZoomComponent->CrouchWithCamera(false);
+
 	}
 }
 
@@ -129,11 +132,9 @@ void AGameplayActor::SetShooting(bool Value)
 	if (Value)
 	{
 		M_WeaponComponent->ShootWeapon(M_PlayerCamera, this);
-		UE_LOG(LogTemp, Warning, TEXT("Shooting"))
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Stop Shooting"))
 	}
 }
 

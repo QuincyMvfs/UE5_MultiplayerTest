@@ -8,30 +8,23 @@
 // Sets default values for this component's properties
 UCameraZoomComponent::UCameraZoomComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
-}
-
-
-// Called when the game starts
-void UCameraZoomComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
 	
 }
 
-
-// Called every frame
-void UCameraZoomComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCameraZoomComponent::SetCameraComponent(UCameraComponent* InputCamera, USpringArmComponent* SpringArm)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	// References
+	m_cameraComponent = InputCamera;
+	m_springArm = SpringArm;
 
-	// ...
+	// Zooming
+	m_defaultCameraFOV = InputCamera->FieldOfView;
+	m_currentZoomFOV = m_defaultCameraFOV;
+
+	// Crouching
+	m_defaultHeight = m_springArm->SocketOffset.Y;
+	m_currentHeight = m_defaultHeight;
+	m_bottomHeight = m_defaultHeight - M_CrouchHeight;
 }
 
 // FUNCTION CALLED BY PLAYER ACTOR
@@ -79,10 +72,51 @@ void UCameraZoomComponent::CameraZoomOut()
 	else { ZoomOutTimer.Invalidate(); }
 }
 
-void UCameraZoomComponent::SetCameraComponent(UCameraComponent* InputCamera)
+void UCameraZoomComponent::CrouchWithCamera(bool DropDown)
 {
-	m_cameraComponent = InputCamera;
-	m_defaultCameraFOV = InputCamera->FieldOfView;
-	m_currentZoomFOV = m_defaultCameraFOV;
+	if (DropDown && m_springArm)
+	{
+		m_stopDropping = false;
+		CameraDropDown();
+		m_stopRaising = true;
+	}
+	else if (!DropDown && m_springArm)
+	{
+		m_stopRaising = false;
+		CameraRaiseUp();
+		m_stopDropping = true;
+	}
+}
+
+// LOWERS CAMERA WHEN CROUCHING
+void UCameraZoomComponent::CameraDropDown()
+{
+	FTimerHandle CameraDropDownTimer;
+	if (m_currentHeight > m_bottomHeight && m_cameraComponent && !m_stopDropping)
+	{
+		FVector newHeight = m_springArm->SocketOffset;
+		m_currentHeight -= M_ZoomRate;
+		newHeight.Z = m_currentHeight;
+		m_springArm->SocketOffset = newHeight;
+		GetWorld()->GetTimerManager().SetTimer(
+				CameraDropDownTimer, this, &UCameraZoomComponent::CameraDropDown, m_timerPlayRate);
+	}
+	else { CameraDropDownTimer.Invalidate(); }
+}
+
+// RAISES CAMERA WHEN UN-CROUCHING
+void UCameraZoomComponent::CameraRaiseUp()
+{
+	FTimerHandle CameraDropDownTimer;
+	if (m_currentHeight < m_defaultHeight && m_cameraComponent && !m_stopRaising)
+	{
+		FVector newHeight = m_springArm->SocketOffset;
+		m_currentHeight += M_ZoomRate;
+		newHeight.Z = m_currentHeight;
+		m_springArm->SocketOffset = newHeight;
+		GetWorld()->GetTimerManager().SetTimer(
+				CameraDropDownTimer, this, &UCameraZoomComponent::CameraRaiseUp, m_timerPlayRate);
+	}
+	else { CameraDropDownTimer.Invalidate(); }
 }
 

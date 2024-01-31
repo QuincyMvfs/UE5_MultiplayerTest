@@ -115,5 +115,4 @@ private:
 	EMovementStates m_currentState;
 	bool m_isAiming;
 	bool m_isShooting;
-	bool m_isReloading;
 };

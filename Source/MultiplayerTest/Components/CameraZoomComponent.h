@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "CameraZoomComponent.generated.h"
 
 
+class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -18,39 +20,49 @@ public:
 	// Sets default values for this component's properties
 	UCameraZoomComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION(BlueprintCallable)
 	void ZoomCamera(bool ZoomIn);
 
 	UFUNCTION(BlueprintCallable)
-	void CameraZoomIn();
+	void CrouchWithCamera(bool DropDown);
 
 	UFUNCTION(BlueprintCallable)
-	void CameraZoomOut();
-
-	UFUNCTION(BlueprintCallable)
-	void SetCameraComponent(UCameraComponent* InputCamera);
+	void SetCameraComponent(UCameraComponent* InputCamera, USpringArmComponent* SpringArm);
 	
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
 	float M_CameraZoomedFOV = 40.0f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
 	float M_ZoomRate = 1.7f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crouch Cam")
+	float M_CrouchHeight = 50.0f;
 
 private:
+	void CameraZoomIn();
+	void CameraZoomOut();
+
+	void CameraDropDown();
+	void CameraRaiseUp();
+
+private:
+	float m_timerPlayRate = 0.005f;
+	
+	// Zooming
 	bool m_stopZoomingIn;
 	bool m_stopZoomingOut;
 	float m_defaultCameraFOV;
 	float m_currentZoomFOV;
-	float m_timerPlayRate = 0.005f;
 	UCameraComponent* m_cameraComponent;
+
+	// Crouching
+	bool m_stopDropping;
+	bool m_stopRaising;
+	float m_defaultHeight;
+	float m_currentHeight;
+	float m_bottomHeight;
+	USpringArmComponent* m_springArm;
 };

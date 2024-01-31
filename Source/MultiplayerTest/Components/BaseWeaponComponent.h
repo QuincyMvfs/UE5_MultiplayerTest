@@ -36,7 +36,7 @@ public:
 	float M_Damage = 10.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
-	float M_DelayBetweenShots = 0.4f;
+	float M_DelayBetweenShots = 0.1f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	float M_ReloadDuration = 1.0f;
@@ -44,6 +44,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	int M_MaxMagazineCapacity = 30;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base Weapon Variables")
+	bool M_IsReloading;
 protected:
 	virtual void PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
 
@@ -52,7 +54,6 @@ protected:
 	int m_currentMagazine;
 	float m_nextTimeToShoot;
 	float m_rayLength = 1000.0f;
-	bool m_isReloading;
 	bool m_canFire;
 	
 };

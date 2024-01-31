@@ -37,7 +37,7 @@ bool UBaseWeaponComponent::TryShootWeapon()
 		return true;
 	}
 
-	TryReload();
+	if (m_currentMagazine <= 0) TryReload();
 	return false;
 }
 
@@ -50,19 +50,19 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 		m_currentMagazine--;
 
 		UE_LOG(LogTemp, Warning, TEXT("SHOOT"));
-		FVector startPoint = cameraComponent->GetComponentLocation();
-		FVector forwardVector = cameraComponent->GetForwardVector();
-		FVector endPoint = startPoint + (forwardVector * m_rayLength);
+		const FVector startPoint = cameraComponent->GetComponentLocation();
+		const FVector forwardVector = cameraComponent->GetForwardVector();
+		const FVector endPoint = startPoint + (forwardVector * m_rayLength);
 		PerformRaycast(startPoint, endPoint, shooter);
 	}
 }
 
 void UBaseWeaponComponent::TryReload()
 {
-	if (m_currentMagazine == 0 && !m_isReloading)
+	if (m_currentMagazine < M_MaxMagazineCapacity && !M_IsReloading)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("START RELOAD"));
-		m_isReloading = true;
+		M_IsReloading = true;
 		FTimerHandle ReloadTimer;
 		GetWorld()->GetTimerManager().SetTimer(
 			ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
@@ -73,7 +73,7 @@ void UBaseWeaponComponent::TryReload()
 void UBaseWeaponComponent::Reload()
 {
 	UE_LOG(LogTemp, Warning, TEXT("FINISH RELOAD"));
-	m_isReloading = false;
+	M_IsReloading = false;
 	m_currentMagazine = M_MaxMagazineCapacity;
 }
 
