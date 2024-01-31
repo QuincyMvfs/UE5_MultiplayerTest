@@ -82,25 +82,25 @@ public:
 	void Reload();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_ReloadSpeed = 1.2f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_DelayTillSprinting = 1.2f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_CrouchSpeed = 200.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_WalkSpeed = 300.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_RunSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_SprintSpeed = 900.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_AimingWalkingSpeed = 200.0f;
 	
 private:

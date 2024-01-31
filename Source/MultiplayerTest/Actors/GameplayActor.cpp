@@ -78,13 +78,11 @@ void AGameplayActor::SetCrouching(bool Value)
 	{
 		m_currentState = EMovementStates::Crouching;
 		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Crouched"))
 	}
 	else if (!Value)
 	{
 		m_currentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Standing"))
 	}
 }
 
@@ -102,14 +100,12 @@ void AGameplayActor::SetRunning(bool Value)
 			GetWorld()->GetTimerManager().SetTimer(
 				SprintDelay, this, &AGameplayActor::SetSprintingTrue, M_DelayTillSprinting);
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Start Running"))
 	}
 	else if (!Value && !m_isAiming)
 	{
 		m_currentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		SprintDelay.Invalidate();
-		UE_LOG(LogTemp, Warning, TEXT("Stop Running"))
 	}
 }
 
@@ -133,13 +129,11 @@ void AGameplayActor::SetAiming(bool Value)
 	{
 		m_isAiming = true;
 		M_PlayerMovement->MaxWalkSpeed = M_AimingWalkingSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Aiming"))
 	}
 	else
 	{
 		m_isAiming = false;
 		if (m_currentState != EMovementStates::Crouching){  M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
-		UE_LOG(LogTemp, Warning, TEXT("Not Aiming"))
 	}
 }
 
@@ -149,7 +143,6 @@ void AGameplayActor::SetSprintingTrue()
 	{
 		m_currentState = EMovementStates::Sprinting;
 		M_PlayerMovement->MaxWalkSpeed = M_SprintSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Start Sprinting"))
 	}
 }
 
@@ -166,6 +159,7 @@ void AGameplayActor::TryReload()
 {
 	if (!m_isReloading)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Reload Started"))
 		m_isReloading = true;
 		FTimerHandle ReloadTimer;
 		GetWorld()->GetTimerManager().SetTimer(
@@ -176,4 +170,5 @@ void AGameplayActor::TryReload()
 void AGameplayActor::Reload()
 {
 	m_isReloading = false;
+	UE_LOG(LogTemp, Warning, TEXT("Reload Ended"))
 }
