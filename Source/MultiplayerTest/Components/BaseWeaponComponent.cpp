@@ -136,8 +136,41 @@ void UBaseWeaponComponent::TryReload()
 		FTimerHandle ReloadTimer;
 		GetWorld()->GetTimerManager().SetTimer(
 			ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
+
+		if (!GetOwner()->HasAuthority()) // Client
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CLIENT RELOADING"))
+			Server_TryReload();
+		}
+		else // Server
+		{
+			UE_LOG(LogTemp, Warning, TEXT("SERVER RELOADING"))
+			Multi_TryReload();
+		}
 	}
-	
+}
+
+bool UBaseWeaponComponent::Server_TryReload_Validate()
+{
+	return true;
+}
+
+void UBaseWeaponComponent::Server_TryReload_Implementation()
+{
+	Multi_TryReload();
+}
+
+bool UBaseWeaponComponent::Multi_TryReload_Validate()
+{
+	return true;
+}
+
+void UBaseWeaponComponent::Multi_TryReload_Implementation()
+{
+	M_IsReloading = true;
+	FTimerHandle ReloadTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
 }
 
 void UBaseWeaponComponent::Reload()
@@ -145,6 +178,7 @@ void UBaseWeaponComponent::Reload()
 	M_IsReloading = false;
 	m_currentMagazine = M_MaxMagazineCapacity;
 }
+
 
 void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter)
 {

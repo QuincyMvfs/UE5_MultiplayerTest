@@ -21,13 +21,16 @@ public:
 	UBaseWeaponComponent();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// SHOOTING CLIENT + SERVER
+	virtual bool TryShootWeapon();
+	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	bool Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
@@ -37,13 +40,21 @@ public:
 	void Multi_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	bool Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	void Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// END OF SHOOTING FUNCTIONS
 	
-	virtual bool TryShootWeapon();
-	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	// RELOADING CLIENT + SERVER
 	virtual void TryReload();
 	virtual void Reload();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_TryReload();
+	bool Server_TryReload_Validate();
+	void Server_TryReload_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_TryReload();
+	bool Multi_TryReload_Validate();
+	void Multi_TryReload_Implementation();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")

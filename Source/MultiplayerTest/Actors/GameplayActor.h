@@ -74,8 +74,28 @@ public:
 	UFUNCTION()
 	void SetCrouching(bool Value);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SetCrouching(bool Value);
+	bool Server_SetCrouching_Validate(bool Value);
+	void Server_SetCrouching_Implementation(bool Value);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_SetCrouching(bool Value);
+	bool Multi_SetCrouching_Validate(bool Value);
+	void Multi_SetCrouching_Implementation(bool Value);
+	
 	UFUNCTION()
 	void SetRunning(bool Value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SetRunning(bool Value);
+	bool Server_SetRunning_Validate(bool Value);
+	void Server_SetRunning_Implementation(bool Value);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_SetRunning(bool Value);
+	bool Multi_SetRunning_Validate(bool Value);
+	void Multi_SetRunning_Implementation(bool Value);
 
 	UFUNCTION()
 	void SetShooting(bool Value);
@@ -123,12 +143,14 @@ private:
 	// Bools
 	UPROPERTY(Replicated)
 	EMovementStates m_currentState;
+
+	// UFUNCTION()
+	// void OnRep_Crouching();
+	
 	UPROPERTY(Replicated)
 	float m_currentSpeed;
 	UPROPERTY(Replicated)
 	float m_currentVelocity;
 	UPROPERTY(Replicated)
 	bool m_isShooting;
-	UPROPERTY(Replicated)
-	bool m_isReloading;
 };

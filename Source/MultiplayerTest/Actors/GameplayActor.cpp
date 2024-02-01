@@ -75,8 +75,7 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	bIsFalling = M_PlayerMovement->IsFalling();
 	bIsAiming = M_IsAiming;
 	bIsShooting = m_isShooting;
-	m_isReloading = M_WeaponComponent->M_IsReloading;
-	bisReloading = m_isReloading;
+	bisReloading = M_WeaponComponent->M_IsReloading;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
 	CurrentState = m_currentState;
@@ -92,10 +91,9 @@ void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	DOREPLIFETIME(AGameplayActor, m_currentSpeed);
 	DOREPLIFETIME(AGameplayActor, m_currentVelocity);
 	DOREPLIFETIME(AGameplayActor, m_isShooting);
-	DOREPLIFETIME(AGameplayActor, m_isReloading);
 }
 
-// CROUCHING
+// CROUCHING CLIENT + SERVER
 void AGameplayActor::SetCrouching(bool Value)
 {
 	if (m_currentState == EMovementStates::Running
@@ -115,11 +113,57 @@ void AGameplayActor::SetCrouching(bool Value)
 		m_currentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		M_CameraZoomComponent->CrouchWithCamera(false);
+	}
 
+	if (!HasAuthority())
+	{
+		Server_SetCrouching(Value);
+		UE_LOG(LogTemp, Warning, TEXT("Client Crouch"))
+	}
+	else
+	{
+		Multi_SetCrouching(Value);
+		UE_LOG(LogTemp, Warning, TEXT("Server Crouch"))
 	}
 }
 
-// RUNNING
+bool AGameplayActor::Server_SetCrouching_Validate(bool Value)
+{
+	return true;
+}
+
+void AGameplayActor::Server_SetCrouching_Implementation(bool Value)
+{
+	Multi_SetCrouching_Implementation(Value);
+}
+
+bool AGameplayActor::Multi_SetCrouching_Validate(bool Value)
+{
+	return true;
+}
+
+void AGameplayActor::Multi_SetCrouching_Implementation(bool Value)
+{
+	if (m_currentState == EMovementStates::Running
+	|| m_currentState == EMovementStates::Sprinting
+	|| m_currentState == EMovementStates::Jumping)
+	{
+		// Do nothing
+	}
+	else if (Value)
+	{
+		m_currentState = EMovementStates::Crouching;
+		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
+	}
+	else if (!Value)
+	{
+		m_currentState = EMovementStates::Idle;
+		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
+	}
+}
+// END OF CROUCHING
+
+// RUNNING CLIENT + SERVER
 void AGameplayActor::SetRunning(bool Value)
 {
 	FTimerHandle SprintDelay;
@@ -140,7 +184,55 @@ void AGameplayActor::SetRunning(bool Value)
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		SprintDelay.Invalidate();
 	}
+
+	
+	if (!HasAuthority()) // Client
+	{
+		Server_SetRunning(Value);
+	}
+	else // Server
+	{
+		Multi_SetRunning(Value);
+	}
 }
+
+bool AGameplayActor::Server_SetRunning_Validate(bool Value)
+{
+	return true;
+}
+
+void AGameplayActor::Server_SetRunning_Implementation(bool Value)
+{
+	Multi_SetRunning(Value);
+}
+
+bool AGameplayActor::Multi_SetRunning_Validate(bool Value)
+{
+	return true;
+}
+
+void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
+{
+	FTimerHandle SprintDelay;
+	
+	if (Value && !M_IsAiming)
+	{
+		m_currentState = EMovementStates::Running;
+		M_PlayerMovement->MaxWalkSpeed = M_RunSpeed;
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				SprintDelay, this, &AGameplayActor::SetSprintingTrue, M_DelayTillSprinting);
+		}
+	}
+	else if (!Value && !M_IsAiming)
+	{
+		m_currentState = EMovementStates::Idle;
+		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
+		SprintDelay.Invalidate();
+	}
+}
+// END OF RUNNING 
 
 // SHOOTING
 void AGameplayActor::SetShooting(bool Value)
@@ -198,4 +290,5 @@ void AGameplayActor::Reload()
 {
 	M_WeaponComponent->TryReload();
 }
+
 
