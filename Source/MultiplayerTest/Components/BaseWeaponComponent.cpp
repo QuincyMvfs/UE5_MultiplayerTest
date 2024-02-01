@@ -17,7 +17,6 @@ UBaseWeaponComponent::UBaseWeaponComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	m_currentMagazine = M_MaxMagazineCapacity;
-	M_ShotsFired = 0;
 }
 
 
@@ -86,6 +85,13 @@ void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* 
 		
 	}
 	
+}
+
+void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UBaseWeaponComponent, M_IsReloading);
 }
 
 // SHOOT

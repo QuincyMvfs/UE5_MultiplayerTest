@@ -37,6 +37,8 @@ public:
 	void Multi_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	bool Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	void Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual bool TryShootWeapon();
 	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
@@ -44,9 +46,6 @@ public:
 	virtual void Reload();
 
 public:
-	UPROPERTY(Replicated)
-	uint8 M_ShotsFired;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	USoundBase* M_FireSound;
 	
@@ -62,7 +61,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	int M_MaxMagazineCapacity = 30;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base Weapon Variables")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Base Weapon Variables")
 	bool M_IsReloading;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")

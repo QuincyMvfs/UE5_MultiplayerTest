@@ -13,6 +13,7 @@
 #include "MultiplayerTest/EMovementStates.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AGameplayActor::AGameplayActor()
@@ -74,11 +75,24 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	bIsFalling = M_PlayerMovement->IsFalling();
 	bIsAiming = M_IsAiming;
 	bIsShooting = m_isShooting;
-	bisReloading = M_WeaponComponent->M_IsReloading;
+	m_isReloading = M_WeaponComponent->M_IsReloading;
+	bisReloading = m_isReloading;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
 	CurrentState = m_currentState;
 	
+}
+
+void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGameplayActor, M_IsAiming);
+	DOREPLIFETIME(AGameplayActor, m_currentState);
+	DOREPLIFETIME(AGameplayActor, m_currentSpeed);
+	DOREPLIFETIME(AGameplayActor, m_currentVelocity);
+	DOREPLIFETIME(AGameplayActor, m_isShooting);
+	DOREPLIFETIME(AGameplayActor, m_isReloading);
 }
 
 // CROUCHING

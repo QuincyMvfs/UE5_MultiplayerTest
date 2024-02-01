@@ -67,6 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
+
+	// SETS REPLICATED VARIABLES
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UFUNCTION()
 	void SetCrouching(bool Value);
@@ -111,15 +114,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_AimingWalkingSpeed = 200.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsAiming;
 	
 private:
 	FVector2d m_movementVector;
 
 	// Bools
+	UPROPERTY(Replicated)
 	EMovementStates m_currentState;
+	UPROPERTY(Replicated)
 	float m_currentSpeed;
+	UPROPERTY(Replicated)
 	float m_currentVelocity;
+	UPROPERTY(Replicated)
 	bool m_isShooting;
+	UPROPERTY(Replicated)
+	bool m_isReloading;
 };
