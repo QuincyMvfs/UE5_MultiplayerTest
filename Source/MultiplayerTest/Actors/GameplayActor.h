@@ -28,6 +28,9 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* M_WeaponModelSKC;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* M_MuzzleLocationComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UArrowComponent* M_PlayerArrowComponent;
@@ -64,7 +67,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
-
+	
 	UFUNCTION()
 	void SetCrouching(bool Value);
 
@@ -85,7 +88,7 @@ public:
 
 	UFUNCTION()
 	void Reload();
-
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_ReloadSpeed = 1.2f;
@@ -110,10 +113,13 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsAiming;
+	
 private:
 	FVector2d m_movementVector;
 
 	// Bools
 	EMovementStates m_currentState;
+	float m_currentSpeed;
+	float m_currentVelocity;
 	bool m_isShooting;
 };

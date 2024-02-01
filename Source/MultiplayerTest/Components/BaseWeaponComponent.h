@@ -7,6 +7,7 @@
 #include "BaseWeaponComponent.generated.h"
 
 
+class USoundCue;
 class AGrenadeProjectile;
 class UCameraComponent;
 
@@ -27,12 +28,28 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	bool Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	void Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	bool Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	void Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	
 	virtual bool TryShootWeapon();
-	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter);
+	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	virtual void TryReload();
 	virtual void Reload();
 
 public:
+	UPROPERTY(Replicated)
+	uint8 M_ShotsFired;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
+	USoundBase* M_FireSound;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	float M_Damage = 10.0f;
 	
@@ -50,7 +67,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	TSubclassOf<class AActor> M_GrenadeActor;
-	
+
 protected:
 	virtual void PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
 
@@ -60,5 +77,4 @@ protected:
 	float m_nextTimeToShoot;
 	float m_rayLength = 1000.0f;
 	bool m_canFire;
-	
 };

@@ -28,6 +28,8 @@ AGameplayActor::AGameplayActor()
 	M_PlayerModelSKC = GetMesh();
 	M_WeaponModelSKC = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponSKC"));
 	M_WeaponModelSKC->SetupAttachment(M_PlayerModelSKC, "RightHand");
+	M_MuzzleLocationComponent = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
+	M_MuzzleLocationComponent->SetupAttachment(M_WeaponModelSKC, "b_gun_muzzleflash");
 
 	// ETC
 	M_PlayerArrowComponent = GetArrowComponent();
@@ -131,7 +133,7 @@ void AGameplayActor::SetShooting(bool Value)
 {
 	if (Value)
 	{
-		M_WeaponComponent->ShootWeapon(M_PlayerCamera, this);
+		M_WeaponComponent->ShootWeapon(M_PlayerCamera, this, M_MuzzleLocationComponent->GetComponentLocation());
 		if (!m_isShooting) m_isShooting = true;
 	}
 	else
@@ -182,3 +184,4 @@ void AGameplayActor::Reload()
 {
 	M_WeaponComponent->TryReload();
 }
+

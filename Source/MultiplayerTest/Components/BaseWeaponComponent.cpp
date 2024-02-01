@@ -5,8 +5,11 @@
 
 #include "HealthComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MultiplayerTest/Actors/GameplayActor.h"
 #include "MultiplayerTest/Actors/GrenadeProjectile.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UBaseWeaponComponent::UBaseWeaponComponent()
@@ -14,17 +17,15 @@ UBaseWeaponComponent::UBaseWeaponComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	m_currentMagazine = M_MaxMagazineCapacity;
+	M_ShotsFired = 0;
 }
 
 
 // Called when the game starts
-void UBaseWeaponComponent::BeginPlay() { Super::BeginPlay(); }
-
-
-// Called every frame
-void UBaseWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UBaseWeaponComponent::BeginPlay()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::BeginPlay();
+
 }
 
 // CHECK ALL VARIABLES TO SEE IF PLAYER CAN SHOOT
@@ -42,8 +43,53 @@ bool UBaseWeaponComponent::TryShootWeapon()
 	return false;
 }
 
+// Called every frame
+void UBaseWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+// SHOOT SERVER
+bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
+{
+	return true;
+}
+
+void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
+{
+	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+}
+
+// MULTICAST SHOOT
+bool UBaseWeaponComponent::Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
+{
+	return true;
+}
+
+void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
+{
+	APawn* PawnOwner = Cast<APawn>(shooter);
+	if (!PawnOwner->IsLocallyControlled())
+	{
+		const FVector startPoint = cameraComponent->GetComponentLocation();
+		const FVector forwardVector = cameraComponent->GetForwardVector();
+		const FVector endPoint = startPoint + (forwardVector * m_rayLength);
+		
+		FActorSpawnParameters spawnParams;
+		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor, muzzleLocation, shooter->GetActorRotation(), spawnParams);
+		
+		if (M_FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
+			UE_LOG(LogTemp, Warning, TEXT("MULTICAST SOUND"));
+		}
+		
+	}
+	
+}
+
 // SHOOT
-void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter)
+void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
 {
 	if (TryShootWeapon())
 	{
@@ -53,10 +99,26 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 		const FVector startPoint = cameraComponent->GetComponentLocation();
 		const FVector forwardVector = cameraComponent->GetForwardVector();
 		const FVector endPoint = startPoint + (forwardVector * m_rayLength);
+
 		PerformRaycast(startPoint, endPoint, shooter);
 		FActorSpawnParameters spawnParams;
-		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor, startPoint, shooter->GetActorRotation(), spawnParams);
+		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor, muzzleLocation, shooter->GetActorRotation(), spawnParams);
 
+		if (M_FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
+		}
+		
+		// CLIENT
+		if (!shooter->HasAuthority())
+		{
+			Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+		}
+		// SERVER
+		else
+		{
+			Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+		}
 	}
 }
 
