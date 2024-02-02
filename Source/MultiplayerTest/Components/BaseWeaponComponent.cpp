@@ -54,16 +54,12 @@ bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* camer
 	return true;
 }
 
-void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
-{
-	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-}
+void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent,
+	AActor* shooter, FVector muzzleLocation) { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
 
-// MULTICAST SHOOT
-bool UBaseWeaponComponent::Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
-{
-	return true;
-}
+// SERVER SHOOT
+bool UBaseWeaponComponent::Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent,
+	AActor* shooter, FVector muzzleLocation) { return true; }
 
 void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
 {
