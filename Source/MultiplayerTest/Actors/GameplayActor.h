@@ -104,6 +104,14 @@ public:
 	void SetAiming(bool Value);
 
 	UFUNCTION()
+	void OnRep_SetAiming();
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SetAiming(bool Value);
+	bool Server_SetAiming_Validate(bool Value);
+	void Server_SetAiming_Implementation(bool Value);
+
+	UFUNCTION()
 	void SetSprintingTrue();
 
 	UFUNCTION()
@@ -134,7 +142,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_AimingWalkingSpeed = 200.0f;
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing = OnRep_SetAiming, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsAiming;
 	
 private:
@@ -143,14 +151,13 @@ private:
 	// Bools
 	UPROPERTY(Replicated)
 	EMovementStates m_currentState;
-
-	// UFUNCTION()
-	// void OnRep_Crouching();
 	
 	UPROPERTY(Replicated)
 	float m_currentSpeed;
+	
 	UPROPERTY(Replicated)
 	float m_currentVelocity;
+	
 	UPROPERTY(Replicated)
 	bool m_isShooting;
 };

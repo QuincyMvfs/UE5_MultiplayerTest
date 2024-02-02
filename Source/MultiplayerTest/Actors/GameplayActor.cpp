@@ -86,7 +86,7 @@ void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AGameplayActor, M_IsAiming);
+	DOREPLIFETIME_CONDITION(AGameplayActor, M_IsAiming, COND_SkipOwner);
 	DOREPLIFETIME(AGameplayActor, m_currentState);
 	DOREPLIFETIME(AGameplayActor, m_currentSpeed);
 	DOREPLIFETIME(AGameplayActor, m_currentVelocity);
@@ -248,7 +248,7 @@ void AGameplayActor::SetShooting(bool Value)
 	}
 }
 
-// AIMING
+//* AIMING | CLIENT + SERVER
 void AGameplayActor::SetAiming(bool Value)
 {
 	if (Value)
@@ -260,11 +260,45 @@ void AGameplayActor::SetAiming(bool Value)
 	else
 	{
 		M_IsAiming = false;
-		if (m_currentState != EMovementStates::Crouching){  M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
+		if (m_currentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 		M_CameraZoomComponent->ZoomCamera(false);
+	}
 
+	if (!HasAuthority()){ Server_SetAiming(Value); }
+	else { OnRep_SetAiming(); }
+}
+
+bool AGameplayActor::Server_SetAiming_Validate(bool Value) { return true; }
+void AGameplayActor::Server_SetAiming_Implementation(bool Value)
+{
+	if (Value)
+	{
+		M_IsAiming = true;
+		M_PlayerMovement->MaxWalkSpeed = M_AimingWalkingSpeed;
+	}
+	else
+	{
+		M_IsAiming = false;
+		if (m_currentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
+	}
+	
+	OnRep_SetAiming();
+}
+
+void AGameplayActor::OnRep_SetAiming()
+{
+	if (M_IsAiming)
+	{
+		M_IsAiming = true;
+		M_PlayerMovement->MaxWalkSpeed = M_AimingWalkingSpeed;
+	}
+	else
+	{
+		M_IsAiming = false;
+		if (m_currentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 	}
 }
+//*
 
 // MAKES THE PLAYER BEGIN SPRINTING
 void AGameplayActor::SetSprintingTrue()

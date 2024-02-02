@@ -33,7 +33,7 @@ bool UBaseWeaponComponent::TryShootWeapon()
 	// TRUE = CAN SHOOT
 	// FALSE = CANT SHOOT
 	if (m_nextTimeToShoot <= GetWorld()->GetTimeSeconds()
-		&& m_currentMagazine > 0)
+		&& m_currentMagazine > 0 && !M_IsReloading)
 	{
 		return true;
 	}
@@ -82,9 +82,7 @@ void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* 
 			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
 			UE_LOG(LogTemp, Warning, TEXT("MULTICAST SOUND"));
 		}
-		
 	}
-	
 }
 
 void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -108,23 +106,13 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 
 		PerformRaycast(startPoint, endPoint, shooter);
 		FActorSpawnParameters spawnParams;
-		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor, muzzleLocation, shooter->GetActorRotation(), spawnParams);
+		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor,
+			muzzleLocation, shooter->GetActorRotation(), spawnParams);
 
-		if (M_FireSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
-		}
+		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
 		
-		// CLIENT
-		if (!shooter->HasAuthority())
-		{
-			Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-		}
-		// SERVER
-		else
-		{
-			Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-		}
+		if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+		else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
 	}
 }
 
