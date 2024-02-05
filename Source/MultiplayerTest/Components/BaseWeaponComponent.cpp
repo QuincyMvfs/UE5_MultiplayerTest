@@ -7,7 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MultiplayerTest/GameplayPlayerState.h"
 #include "MultiplayerTest/MultiplayerTestGameModeBase.h"
+#include "MultiplayerTest/Actors/GameplayActor.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -184,6 +186,14 @@ void UBaseWeaponComponent::Multi_DealDamage_Implementation(float Amount, AActor*
 	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
 	{
 		GM->PlayerHit();
+	}
+
+	if (AGameplayActor* InstigatorPlayer = Cast<AGameplayActor>(GetOwner()))
+	{
+		if (AGameplayPlayerState* PS = InstigatorPlayer->GetPlayerState<AGameplayPlayerState>())
+		{
+			PS->PlayerHit();
+		}
 	}
 }
 
