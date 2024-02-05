@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
@@ -49,6 +50,8 @@ AGameplayActor::AGameplayActor()
 	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
 	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
 	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	M_HealthBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
+	M_HealthBar->SetupAttachment(M_PlayerModelSKC, "HeadTop_End");
 }
 
 // Called when the game starts or when spawned

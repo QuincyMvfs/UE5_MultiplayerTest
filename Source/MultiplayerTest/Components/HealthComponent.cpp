@@ -41,6 +41,7 @@ void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Ins
 	{
 		m_currentHealth -= Amount;
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
+		OnDamagedEvent.Broadcast(m_currentHealth / M_MaxHealth);
 	}
 }
 

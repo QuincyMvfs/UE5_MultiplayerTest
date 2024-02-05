@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamaged, float, HealthPercent);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UHealthComponent : public UActorComponent
 {
@@ -22,6 +24,9 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnDamaged OnDamagedEvent;
+	
 	UFUNCTION(BlueprintCallable, Category = Health)
 	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
 

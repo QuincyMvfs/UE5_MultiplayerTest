@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UWidgetComponent;
 class UHealthComponent;
 class UCameraZoomComponent;
 class UBaseWeaponComponent;
@@ -53,6 +54,9 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UHealthComponent* M_PlayerHealthComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	UWidgetComponent* M_HealthBar;
 	
 public:
 	// Sets default values for this character's properties
