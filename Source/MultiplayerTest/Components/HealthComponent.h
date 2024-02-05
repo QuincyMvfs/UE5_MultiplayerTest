@@ -20,16 +20,27 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+
+public:	
 	UFUNCTION(BlueprintCallable, Category = Health)
 	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
+	bool Server_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim);
+	void Server_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
+	bool Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim);
+	void Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float M_MaxHealth = 100.0f;
 
 protected:
+	UPROPERTY(Replicated)
 	float m_currentHealth;
 };

@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
+#include "Engine/LocalPlayer.h"
 
 AGameplayPlayerController::AGameplayPlayerController()
 {

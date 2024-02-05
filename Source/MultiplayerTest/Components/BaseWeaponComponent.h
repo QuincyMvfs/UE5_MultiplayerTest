@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "BaseWeaponComponent.generated.h"
 
 
@@ -24,7 +26,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// SHOOTING CLIENT + SERVER
@@ -78,13 +79,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	TSubclassOf<class AActor> M_GrenadeActor;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
+	UNiagaraSystem* M_BulletTracer;
+
 protected:
 	virtual void PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
-
+	virtual void SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation);
 	
 protected:
+	UPROPERTY(Replicated)
+	FVector m_startPoint;
+	UPROPERTY(Replicated)
+	FVector m_forwardVector;
+	UPROPERTY(Replicated)
+	FVector m_endPoint;
+	UPROPERTY(Replicated)
+	FVector m_muzzleLocation;
+	
 	int m_currentMagazine;
 	float m_nextTimeToShoot;
-	float m_rayLength = 1000.0f;
+	float m_rayLength = 100000.0f;
 	bool m_canFire;
 };

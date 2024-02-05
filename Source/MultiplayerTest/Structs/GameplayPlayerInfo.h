@@ -4,12 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-
+#include "UObject/NoExportTypes.h"
 #include "GameplayPlayerInfo.generated.h"
 
-/**
- * 
- */
 USTRUCT(BlueprintType)
 struct MULTIPLAYERTEST_API FGameplayPlayerInfo : public FTableRowBase
 {

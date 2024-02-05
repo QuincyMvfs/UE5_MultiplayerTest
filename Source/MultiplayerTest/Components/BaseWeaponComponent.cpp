@@ -7,8 +7,6 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "MultiplayerTest/Actors/GameplayActor.h"
-#include "MultiplayerTest/Actors/GrenadeProjectile.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -27,6 +25,38 @@ void UBaseWeaponComponent::BeginPlay()
 
 }
 
+void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UBaseWeaponComponent, M_IsReloading);
+	DOREPLIFETIME(UBaseWeaponComponent, m_startPoint);
+	DOREPLIFETIME(UBaseWeaponComponent, m_endPoint);
+	DOREPLIFETIME(UBaseWeaponComponent, m_forwardVector);
+	DOREPLIFETIME(UBaseWeaponComponent, m_muzzleLocation);
+}
+
+// SHOOT
+void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
+{
+	if (TryShootWeapon())
+	{
+		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
+		m_currentMagazine--;
+
+		m_startPoint = cameraComponent->GetComponentLocation();
+		m_forwardVector = cameraComponent->GetForwardVector();
+		m_endPoint = m_startPoint + (m_forwardVector * m_rayLength);
+		m_muzzleLocation = muzzleLocation;
+		PerformRaycast(m_startPoint, m_endPoint, shooter);
+
+		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
+		
+		if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+		else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+	}
+}
+
 // CHECK ALL VARIABLES TO SEE IF PLAYER CAN SHOOT
 bool UBaseWeaponComponent::TryShootWeapon()
 {
@@ -42,73 +72,33 @@ bool UBaseWeaponComponent::TryShootWeapon()
 	return false;
 }
 
-// Called every frame
-void UBaseWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
-// SHOOT SERVER
-bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
-{
-	return true;
-}
-
+// CLIENT SHOOT
+bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter,
+	FVector muzzleLocation) { return true; }
 void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent,
-	AActor* shooter, FVector muzzleLocation) { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+	AActor* shooter, FVector muzzleLocation)
+{
+	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+}
 
 // SERVER SHOOT
 bool UBaseWeaponComponent::Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent,
 	AActor* shooter, FVector muzzleLocation) { return true; }
-
 void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
 {
 	APawn* PawnOwner = Cast<APawn>(shooter);
 	if (!PawnOwner->IsLocallyControlled())
 	{
-		const FVector startPoint = cameraComponent->GetComponentLocation();
-		const FVector forwardVector = cameraComponent->GetForwardVector();
-		const FVector endPoint = startPoint + (forwardVector * m_rayLength);
-		
-		FActorSpawnParameters spawnParams;
-		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor, muzzleLocation, shooter->GetActorRotation(), spawnParams);
+		m_startPoint = cameraComponent->GetComponentLocation();
+		m_forwardVector = cameraComponent->GetForwardVector();
+		m_endPoint = m_startPoint + (m_forwardVector * m_rayLength);
+		m_muzzleLocation = muzzleLocation;
+		PerformRaycast(m_startPoint, m_endPoint, shooter);
 		
 		if (M_FireSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
-			UE_LOG(LogTemp, Warning, TEXT("MULTICAST SOUND"));
 		}
-	}
-}
-
-void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UBaseWeaponComponent, M_IsReloading);
-}
-
-// SHOOT
-void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
-{
-	if (TryShootWeapon())
-	{
-		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
-		m_currentMagazine--;
-
-		const FVector startPoint = cameraComponent->GetComponentLocation();
-		const FVector forwardVector = cameraComponent->GetForwardVector();
-		const FVector endPoint = startPoint + (forwardVector * m_rayLength);
-
-		PerformRaycast(startPoint, endPoint, shooter);
-		FActorSpawnParameters spawnParams;
-		AGrenadeProjectile* spawnedGrenade = GetWorld()->SpawnActor<AGrenadeProjectile>(M_GrenadeActor,
-			muzzleLocation, shooter->GetActorRotation(), spawnParams);
-
-		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
-		
-		if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
-		else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
 	}
 }
 
@@ -121,34 +111,18 @@ void UBaseWeaponComponent::TryReload()
 		GetWorld()->GetTimerManager().SetTimer(
 			ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
 
-		if (!GetOwner()->HasAuthority()) // Client
-		{
-			UE_LOG(LogTemp, Warning, TEXT("CLIENT RELOADING"))
-			Server_TryReload();
-		}
-		else // Server
-		{
-			UE_LOG(LogTemp, Warning, TEXT("SERVER RELOADING"))
-			Multi_TryReload();
-		}
+		if (!GetOwner()->HasAuthority()) { Server_TryReload(); }
+		else { Multi_TryReload(); }
 	}
 }
 
-bool UBaseWeaponComponent::Server_TryReload_Validate()
-{
-	return true;
-}
-
+bool UBaseWeaponComponent::Server_TryReload_Validate() { return true; }
 void UBaseWeaponComponent::Server_TryReload_Implementation()
 {
 	Multi_TryReload();
 }
 
-bool UBaseWeaponComponent::Multi_TryReload_Validate()
-{
-	return true;
-}
-
+bool UBaseWeaponComponent::Multi_TryReload_Validate() { return true; }
 void UBaseWeaponComponent::Multi_TryReload_Implementation()
 {
 	M_IsReloading = true;
@@ -168,18 +142,34 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 {
 	FHitResult hitResult;
 	if (bool hitObject = UKismetSystemLibrary::LineTraceSingle(
-		this, startPoint, endPoint, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1),
-		false, TArray<AActor*>(), EDrawDebugTrace::ForDuration, hitResult,
-		true,FColor::White,FColor::Red, 0.2f))
+		this, startPoint, endPoint, UEngineTypes::ConvertToTraceType(ECC_Visibility),
+		true, TArray<AActor*>(), EDrawDebugTrace::ForDuration, hitResult,
+		true,FColor::White,FColor::Red, 0.5f))
 	{
 		if (AActor* hitActor = hitResult.GetActor())
 		{
 			if (UHealthComponent* hitHealth = hitActor->FindComponentByClass<UHealthComponent>())
 			{
 				hitHealth->TakeDamage(M_Damage, shooter, hitActor);
-				UE_LOG(LogTemp, Warning, TEXT("Hit Valid Target"));
 			}
 		}
+		
+		SpawnBulletTracer(m_muzzleLocation, hitResult.Location, m_forwardVector.Rotation());
+	}
+	else
+	{
+		SpawnBulletTracer(m_muzzleLocation, endPoint, m_forwardVector.Rotation());
+	}
+	
+}
+
+void UBaseWeaponComponent::SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation)
+{
+	if (M_BulletTracer)
+	{
+		UNiagaraComponent* SpawnedTracer = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), M_BulletTracer,
+			startPoint, rotation, FVector::One(), true);
+		SpawnedTracer->SetVectorParameter("BeamEnd", endPoint);
 	}
 }
 

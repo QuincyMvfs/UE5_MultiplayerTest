@@ -13,6 +13,7 @@
 #include "MultiplayerTest/EMovementStates.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
+#include "MultiplayerTest/Components/HealthComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -47,6 +48,7 @@ AGameplayActor::AGameplayActor()
 	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));
 	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
 	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
+	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
