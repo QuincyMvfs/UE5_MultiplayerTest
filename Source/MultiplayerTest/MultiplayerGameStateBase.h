@@ -16,4 +16,11 @@ class MULTIPLAYERTEST_API AMultiplayerGameStateBase : public AGameStateBase
 	
 public:
 	AMultiplayerGameStateBase();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	void PlayerHit();
+
+	UPROPERTY(Replicated)
+	uint16 TotalHits;
 };

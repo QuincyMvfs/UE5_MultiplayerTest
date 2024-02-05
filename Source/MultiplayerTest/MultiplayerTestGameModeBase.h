@@ -16,4 +16,6 @@ class MULTIPLAYERTEST_API AMultiplayerTestGameModeBase : public AGameModeBase
 
 public:
 	AMultiplayerTestGameModeBase();
+
+	void PlayerHit();
 };
