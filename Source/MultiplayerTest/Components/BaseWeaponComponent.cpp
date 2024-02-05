@@ -89,10 +89,6 @@ void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* 
 	APawn* PawnOwner = Cast<APawn>(shooter);
 	if (!PawnOwner->IsLocallyControlled())
 	{
-		m_startPoint = cameraComponent->GetComponentLocation();
-		m_forwardVector = cameraComponent->GetForwardVector();
-		m_endPoint = m_startPoint + (m_forwardVector * m_rayLength);
-		m_muzzleLocation = muzzleLocation;
 		PerformRaycast(m_startPoint, m_endPoint, shooter);
 		
 		if (M_FireSound)
@@ -142,25 +138,48 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 {
 	FHitResult hitResult;
 	if (bool hitObject = UKismetSystemLibrary::LineTraceSingle(
-		this, startPoint, endPoint, UEngineTypes::ConvertToTraceType(ECC_Visibility),
+		this, startPoint, endPoint, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1),
 		true, TArray<AActor*>(), EDrawDebugTrace::ForDuration, hitResult,
-		true,FColor::White,FColor::Red, 0.5f))
+		true,FColor::White,FColor::Red, 0.1f))
 	{
 		if (AActor* hitActor = hitResult.GetActor())
 		{
 			if (UHealthComponent* hitHealth = hitActor->FindComponentByClass<UHealthComponent>())
 			{
-				hitHealth->TakeDamage(M_Damage, shooter, hitActor);
+				DealDamage(M_Damage, shooter, hitActor, hitHealth);
 			}
 		}
-		
 		SpawnBulletTracer(m_muzzleLocation, hitResult.Location, m_forwardVector.Rotation());
+	}
+	else { SpawnBulletTracer(m_muzzleLocation, endPoint, m_forwardVector.Rotation()); }
+}
+
+void UBaseWeaponComponent::DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth)
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		Server_DealDamage(Amount, Instigator, Victim, HitHealth);
 	}
 	else
 	{
-		SpawnBulletTracer(m_muzzleLocation, endPoint, m_forwardVector.Rotation());
+		Multi_DealDamage(Amount, Instigator, Victim, HitHealth);
 	}
-	
+}
+
+bool UBaseWeaponComponent::Server_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim,
+	UHealthComponent* HitHealth) { return true; }
+void UBaseWeaponComponent::Server_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim,
+	UHealthComponent* HitHealth)
+{
+	Multi_DealDamage(Amount, Instigator, Victim, HitHealth);
+}
+
+bool UBaseWeaponComponent::Multi_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim,
+	UHealthComponent* HitHealth) { return true;}
+void UBaseWeaponComponent::Multi_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim,
+	UHealthComponent* HitHealth)
+{
+	HitHealth->TakeDamage(Amount, Instigator, Victim);
 }
 
 void UBaseWeaponComponent::SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation)

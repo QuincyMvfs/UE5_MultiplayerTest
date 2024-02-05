@@ -31,18 +31,7 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void UHealthComponent::TakeDamage(float Amount, AActor* Instigator, AActor* Victim)
 {
-	if (!GetOwner()->HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OWNER: %s"), *GetOwner()->GetName());
-		Server_TakeDamage(Amount, Instigator, Victim);
-	}
-	else { Multi_TakeDamage(Amount, Instigator, Victim); }
-}
-
-bool UHealthComponent::Server_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim) { return true; }
-void UHealthComponent::Server_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim)
-{
-	Multi_TakeDamage(Amount, Instigator, Victim);
+	if (GetOwner()->HasAuthority()) { Multi_TakeDamage(Amount, Instigator, Victim); }
 }
 
 bool UHealthComponent::Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim) { return true; }
@@ -52,8 +41,6 @@ void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Ins
 	{
 		m_currentHealth -= Amount;
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
-		UE_LOG(LogTemp, Warning, TEXT("DAMAGE TAKEN: %f"), Amount)
-		UE_LOG(LogTemp, Warning, TEXT("NEW HEALTH: %f"), m_currentHealth)
 	}
 }
 

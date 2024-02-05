@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UHealthComponent : public UActorComponent
 {
@@ -22,15 +21,9 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
-public:	
+public:
 	UFUNCTION(BlueprintCallable, Category = Health)
 	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
-	bool Server_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim);
-	void Server_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim);
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim);

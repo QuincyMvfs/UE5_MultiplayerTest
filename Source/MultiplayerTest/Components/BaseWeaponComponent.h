@@ -9,6 +9,7 @@
 #include "BaseWeaponComponent.generated.h"
 
 
+class UHealthComponent;
 class USoundCue;
 class AGrenadeProjectile;
 class UCameraComponent;
@@ -57,6 +58,18 @@ public:
 	bool Multi_TryReload_Validate();
 	void Multi_TryReload_Implementation();
 
+	void DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+	bool Server_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+	void Server_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+	bool Multi_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+	void Multi_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth);
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
 	USoundBase* M_FireSound;
