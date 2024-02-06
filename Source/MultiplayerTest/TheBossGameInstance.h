@@ -9,6 +9,16 @@
 #include "Engine/GameInstance.h"
 #include "TheBossGameInstance.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyCreatedStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyCreatedSuccessfully);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyCreatedFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinLobbyStarted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttemptJoinLobby);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinLobbySuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinLobbyFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCreateSessionSuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCreateSessionFailure);
+
 /**
  * 
  */
@@ -21,6 +31,33 @@ public:
 	UTheBossGameInstance();
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnLobbyCreatedStart OnLobbyCreatedStartEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLobbyCreatedSuccessfully OnLobbyCreatedSuccessfullyEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLobbyCreatedFailure OnLobbyCreatedFailureEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnJoinLobbyStarted OnJoinLobbyStartedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAttemptJoinLobby OnAttemptJoinLobbyEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnJoinLobbySuccess OnJoinLobbySuccessEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnJoinLobbyFailure OnJoinLobbyFailureEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCreateSessionSuccess OnCreateSessionSuccessEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCreateSessionFailure OnCreateSessionFailureEvent;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Settings")
 	float MouseSensitivity = 1;
 	

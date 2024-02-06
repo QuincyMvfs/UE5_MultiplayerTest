@@ -34,7 +34,15 @@ void UTheBossGameInstance::OnCreateSessionComplete(FName SessionName, bool Succe
 {
 	if (Succeeded)
 	{
-		GetWorld()->ServerTravel("/Script/Engine.World'/Game/Levels/DefaultMap?listen");
+		GetWorld()->ServerTravel("/Game/Levels/DefaultMap?listen");
+		OnLobbyCreatedSuccessfullyEvent.Broadcast();
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Session Created"));
+
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Session Failed to Create"));
+		OnLobbyCreatedFailureEvent.Broadcast();
 	}
 }
 
@@ -45,8 +53,15 @@ void UTheBossGameInstance::OnFindSessionComplete(bool Succeeded)
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
 		if (SearchResults.Num())
 		{
-			SessionInterface->JoinSession(0, M_SessionName, SearchResults[0]);
+			OnAttemptJoinLobbyEvent.Broadcast();
+			SessionInterface->JoinSession(0, FName("The BOSS Server"), SearchResults[0]);
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Find Session Success"));
 		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Join Lobby Fail"));
+		OnJoinLobbyFailureEvent.Broadcast();
 	}
 }
 
@@ -59,7 +74,19 @@ void UTheBossGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessi
 		if (JoinAddress != "")
 		{
 			PlayerController->ClientTravel(JoinAddress, TRAVEL_Absolute);
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Join Lobby Success"));
+			OnJoinLobbySuccessEvent.Broadcast();
 		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Join Lobby Fail | Join Address = NULL"));
+			OnJoinLobbyFailureEvent.Broadcast();
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Join Lobby Fail | Player Controller = NULL"));
+		OnJoinLobbyFailureEvent.Broadcast();
 	}
 }
 
@@ -69,20 +96,27 @@ void UTheBossGameInstance::CreateServer()
 	FOnlineSessionSettings SessionSettings;
 	SessionSettings.bAllowJoinInProgress = true;
 	SessionSettings.bIsDedicated = false;
-	SessionSettings.bIsLANMatch = false;
+	SessionSettings.bIsLANMatch = (IOnlineSubsystem::Get()->GetSubsystemName() == "NULL");
 	SessionSettings.bShouldAdvertise = true;
 	SessionSettings.bUsesPresence = true;
-	SessionSettings.NumPublicConnections = 5;
+	SessionSettings.NumPublicConnections = 20000;
+	SessionSettings.bAllowInvites = true;
+	SessionSettings.BuildUniqueId = 5666;
+	SessionSettings.bUseLobbiesIfAvailable = true;
 
-	SessionInterface->CreateSession(0, M_SessionName, SessionSettings);
+	SessionInterface->CreateSession(0, FName("The BOSS Server"), SessionSettings);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Session Create"));
+	OnLobbyCreatedStartEvent.Broadcast();
 }
 
 void UTheBossGameInstance::JoinServer()
 {
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	SessionSearch->bIsLanQuery = false;
-	SessionSearch->MaxSearchResults = 10000;
+	SessionSearch->bIsLanQuery = (IOnlineSubsystem::Get()->GetSubsystemName() == "NULL");
+	SessionSearch->MaxSearchResults = 20000;
 	SessionSearch->QuerySettings.Set("SEARCH_PRESENCE", true, EOnlineComparisonOp::Equals);
 
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Join Session"));
+	OnJoinLobbyStartedEvent.Broadcast();
 }
