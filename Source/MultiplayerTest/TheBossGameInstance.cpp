@@ -55,9 +55,25 @@ void UTheBossGameInstance::OnFindSessionComplete(bool Succeeded)
 		int32 ArrayIndex = -1;
 		for (FOnlineSessionSearchResult SearchResult: SessionSearch->SearchResults)
 		{
-			OnAttemptJoinLobbyEvent.Broadcast();
-			SessionInterface->JoinSession(0, M_SessionName, SearchResult);
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Find Session Success, Attempting Join...."));
+			ArrayIndex++;
+			if (!SearchResult.IsValid()) continue;
+
+			FServerInfo Info;
+			FString ServerName = "Empty Server Name";
+			FString HostName = "Empty Server Name";
+			SearchResult.Session.SessionSettings.Get(FName("SERVER_NAME_KEY"), ServerName);
+			SearchResult.Session.SessionSettings.Get(FName("SERVER_HOSTNAME_KEY"), HostName);
+			
+			Info.ServerName = ServerName;
+			Info.MaxPlayers = SearchResult.Session.SessionSettings.NumPublicConnections;
+			Info.CurrentPlayers = Info.MaxPlayers - SearchResult.Session.NumOpenPublicConnections;
+			Info.ServerArrayIndex = ArrayIndex;
+			Info.SetPlayerCount();
+			
+			OnFoundLobbyEvent.Broadcast(Info);
+			
+			//SessionInterface->JoinSession(0, M_SessionName, SearchResult);
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Find Session Success, Attempting Join...."));
 
 		}
 	}
@@ -66,6 +82,8 @@ void UTheBossGameInstance::OnFindSessionComplete(bool Succeeded)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Join Lobby Fail"));
 		OnJoinLobbyFailureEvent.Broadcast();
 	}
+
+	OnServerSearchingEvent.Broadcast(false);
 }
 
 void UTheBossGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
@@ -93,7 +111,7 @@ void UTheBossGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessi
 	}
 }
 
-void UTheBossGameInstance::CreateServer()
+void UTheBossGameInstance::CreateServer(FString ServerName, FString HostName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Create Server"));
 	FOnlineSessionSettings SessionSettings;
@@ -110,14 +128,16 @@ void UTheBossGameInstance::CreateServer()
 	SessionSettings.bShouldAdvertise = true;
 	SessionSettings.NumPublicConnections = 5;
 	SessionSettings.NumPrivateConnections  = 5;
-	// SessionSettings.Set(M_SessionName, M_SessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
+	SessionSettings.Set(FName("SERVER_NAME_KEY"), ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	SessionSettings.Set(FName("SERVER_HOSTNAME_KEY"), HostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	
 	SessionInterface->CreateSession(0, M_SessionName, SessionSettings);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Session Create"));
+	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Session Create"));
 	OnLobbyCreatedStartEvent.Broadcast();
 }
 
-void UTheBossGameInstance::JoinServer()
+void UTheBossGameInstance::FindServers()
 {
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
@@ -125,6 +145,19 @@ void UTheBossGameInstance::JoinServer()
 	SessionSearch->QuerySettings.Set("SEARCH_PRESENCE", true, EOnlineComparisonOp::Equals);
 
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Join Session"));
-	OnJoinLobbyStartedEvent.Broadcast();
+	OnServerSearchingEvent.Broadcast(true);
+}
+
+void UTheBossGameInstance::JoinServer(int32 ArrayIndex)
+{
+	FOnlineSessionSearchResult Result = SessionSearch->SearchResults[ArrayIndex];
+	if (Result.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("JOINING SERVER"));
+		SessionInterface->JoinSession(0, M_SessionName, Result);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Failed to Join"));
+	}
 }

@@ -9,19 +9,43 @@
 #include "Engine/GameInstance.h"
 #include "TheBossGameInstance.generated.h"
 
+USTRUCT(BlueprintType)
+struct FServerInfo
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadOnly)
+		FString ServerName;
+	UPROPERTY(BlueprintReadOnly)
+		FString PlayerCountStr;
+	UPROPERTY(BlueprintReadOnly)
+		int32 CurrentPlayers;
+	UPROPERTY(BlueprintReadOnly)
+		int32 MaxPlayers;
+	UPROPERTY(BlueprintReadOnly)
+		int32 ServerArrayIndex;
+
+	void SetPlayerCount()
+	{
+		PlayerCountStr =
+			(FString::FromInt(CurrentPlayers) + "/" + FString::FromInt(MaxPlayers));
+	}
+};
+
+//* Game Instance Delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFoundLobby, FServerInfo, ServerInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnServerSearching, bool, IsSearchingForServer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyCreatedStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyCreatedSuccessfully);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyCreatedFailure);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinLobbyStarted);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttemptJoinLobby);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinLobbySuccess);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinLobbyFailure);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCreateSessionSuccess);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCreateSessionFailure);
+//*
 
-/**
- * 
- */
 UCLASS()
 class MULTIPLAYERTEST_API UTheBossGameInstance : public UGameInstance
 {
@@ -31,6 +55,12 @@ public:
 	UTheBossGameInstance();
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnServerSearching OnServerSearchingEvent;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnFoundLobby OnFoundLobbyEvent;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnLobbyCreatedStart OnLobbyCreatedStartEvent;
 
@@ -42,10 +72,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnJoinLobbyStarted OnJoinLobbyStartedEvent;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnAttemptJoinLobby OnAttemptJoinLobbyEvent;
-
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnJoinLobbySuccess OnJoinLobbySuccessEvent;
 
@@ -75,10 +102,13 @@ protected:
 	virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	UFUNCTION(BlueprintCallable)
-	void CreateServer();
+	void CreateServer(FString ServerName, FString HostName);
 
 	UFUNCTION(BlueprintCallable)
-	void JoinServer();
+	void FindServers();
+
+	UFUNCTION(BlueprintCallable)
+	void JoinServer(int32 ArrayIndex);
 
 	FName M_SessionName = "TheBOSSServer";
 };
