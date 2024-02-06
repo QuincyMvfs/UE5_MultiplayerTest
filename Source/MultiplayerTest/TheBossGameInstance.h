@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "Engine/GameInstance.h"
 #include "TheBossGameInstance.generated.h"
 
@@ -23,4 +26,22 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Settings")
 	float ScopedMouseSensitivity = 0.35f;
+
+protected:
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+	IOnlineSessionPtr SessionInterface;
+
+	virtual void Init() override;
+
+	virtual void OnCreateSessionComplete(FName SessionName, bool Succeeded);
+	virtual void OnFindSessionComplete(bool Succeeded);
+	virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	UFUNCTION(BlueprintCallable)
+	void CreateServer();
+
+	UFUNCTION(BlueprintCallable)
+	void JoinServer();
+
+	FName M_SessionName = "The BOSS Server";
 };

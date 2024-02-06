@@ -3,12 +3,9 @@
 
 #include "GameplayActor.h"
 
-#include "ActorFactories/ActorFactorySkeletalMesh.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
@@ -35,7 +32,6 @@ AGameplayActor::AGameplayActor()
 	M_MuzzleLocationComponent->SetupAttachment(M_WeaponModelSKC, "b_gun_muzzleflash");
 
 	// ETC
-	M_PlayerArrowComponent = GetArrowComponent();
 	M_PlayerMovement = GetCharacterMovement();
 
 	// Camera

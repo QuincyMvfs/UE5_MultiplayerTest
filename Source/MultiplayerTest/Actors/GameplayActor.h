@@ -35,9 +35,6 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 	USceneComponent* M_MuzzleLocationComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
-	UArrowComponent* M_PlayerArrowComponent;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UCharacterMovementComponent* M_PlayerMovement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
