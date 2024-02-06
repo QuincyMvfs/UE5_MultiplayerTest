@@ -37,9 +37,11 @@ AGameplayActor::AGameplayActor()
 	// Camera
 	M_CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	M_CameraSpringArm->SetupAttachment(M_PlayerCapsuleComponent);
+	M_CameraSpringArm->bUsePawnControlRotation = true;
 	M_PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	M_PlayerCamera->SetupAttachment(M_CameraSpringArm);
 	M_PlayerCamera-> bUsePawnControlRotation = true;
+	
 
 	// Custom Classes
 	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));

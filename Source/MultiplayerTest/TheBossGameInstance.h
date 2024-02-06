@@ -80,5 +80,5 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void JoinServer();
 
-	FName M_SessionName = "The BOSS Server";
+	FName M_SessionName = "TheBOSSServer";
 };
