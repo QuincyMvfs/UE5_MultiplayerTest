@@ -18,4 +18,9 @@ public:
 	AMultiplayerTestGameModeBase();
 
 	void PlayerHit();
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<APlayerController*> M_Players;
 };

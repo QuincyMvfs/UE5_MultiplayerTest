@@ -21,3 +21,12 @@ void AMultiplayerTestGameModeBase::PlayerHit()
 		GS->PlayerHit();
 	}
 }
+
+void AMultiplayerTestGameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	M_Players.Add(NewPlayer);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
+		FString::Printf(TEXT("Player Joined: %s"), *M_Players.Last()->GetName()));
+}
