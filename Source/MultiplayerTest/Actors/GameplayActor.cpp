@@ -14,7 +14,7 @@
 #include "MultiplayerTest/Components/HealthComponent.h"
 #include "Net/UnrealNetwork.h"
 
-// Sets default values
+//* Sets default values
 AGameplayActor::AGameplayActor()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -51,25 +51,13 @@ AGameplayActor::AGameplayActor()
 	M_HealthBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
 	M_HealthBar->SetupAttachment(M_PlayerModelSKC, "HeadTop_End");
 }
+//*
 
 // Called when the game starts or when spawned
-void AGameplayActor::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-// Called every frame
-void AGameplayActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
+void AGameplayActor::BeginPlay() { Super::BeginPlay();}
 
 // FORCIBLY SETS THE PLAYERS MOVEMENT VECTOR
-void AGameplayActor::SetPlayerMovementVector(FVector2d Value)
-{
-	m_movementVector = Value;
-}
+void AGameplayActor::SetPlayerMovementVector(FVector2d Value) { m_movementVector = Value; }
 
 // GETS THE VARIABLES USED BY THE ABP
 void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
@@ -85,6 +73,7 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	
 }
 
+// REPLICATES ALL REPLICATED VARIABLES
 void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -96,7 +85,7 @@ void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	DOREPLIFETIME(AGameplayActor, m_isShooting);
 }
 
-// CROUCHING CLIENT + SERVER
+//* CROUCHING | CLIENT + SERVER
 void AGameplayActor::SetCrouching(bool Value)
 {
 	if (m_currentState == EMovementStates::Running
@@ -118,33 +107,19 @@ void AGameplayActor::SetCrouching(bool Value)
 		M_CameraZoomComponent->CrouchWithCamera(false);
 	}
 
-	if (!HasAuthority())
-	{
-		Server_SetCrouching(Value);
-		UE_LOG(LogTemp, Warning, TEXT("Client Crouch"))
-	}
-	else
-	{
-		Multi_SetCrouching(Value);
-		UE_LOG(LogTemp, Warning, TEXT("Server Crouch"))
-	}
+	if (!HasAuthority()) { Server_SetCrouching(Value); }
+	else { Multi_SetCrouching(Value); }
 }
 
-bool AGameplayActor::Server_SetCrouching_Validate(bool Value)
-{
-	return true;
-}
-
+// SERVER
+bool AGameplayActor::Server_SetCrouching_Validate(bool Value) { return true; }
 void AGameplayActor::Server_SetCrouching_Implementation(bool Value)
 {
 	Multi_SetCrouching_Implementation(Value);
 }
 
-bool AGameplayActor::Multi_SetCrouching_Validate(bool Value)
-{
-	return true;
-}
-
+// MULTICAST
+bool AGameplayActor::Multi_SetCrouching_Validate(bool Value) { return true; }
 void AGameplayActor::Multi_SetCrouching_Implementation(bool Value)
 {
 	if (m_currentState == EMovementStates::Running
@@ -164,9 +139,9 @@ void AGameplayActor::Multi_SetCrouching_Implementation(bool Value)
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 	}
 }
-// END OF CROUCHING
+//*
 
-// RUNNING CLIENT + SERVER
+//* RUNNING CLIENT + SERVER
 void AGameplayActor::SetRunning(bool Value)
 {
 	FTimerHandle SprintDelay;
@@ -187,33 +162,20 @@ void AGameplayActor::SetRunning(bool Value)
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		SprintDelay.Invalidate();
 	}
-
 	
-	if (!HasAuthority()) // Client
-	{
-		Server_SetRunning(Value);
-	}
-	else // Server
-	{
-		Multi_SetRunning(Value);
-	}
+	if (!HasAuthority()) { Server_SetRunning(Value); }
+	else { Multi_SetRunning(Value); }
 }
 
-bool AGameplayActor::Server_SetRunning_Validate(bool Value)
-{
-	return true;
-}
-
+// SERVER
+bool AGameplayActor::Server_SetRunning_Validate(bool Value) { return true; }
 void AGameplayActor::Server_SetRunning_Implementation(bool Value)
 {
 	Multi_SetRunning(Value);
 }
 
-bool AGameplayActor::Multi_SetRunning_Validate(bool Value)
-{
-	return true;
-}
-
+// MULTICAST
+bool AGameplayActor::Multi_SetRunning_Validate(bool Value) { return true; }
 void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
 {
 	FTimerHandle SprintDelay;
@@ -235,10 +197,31 @@ void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
 		SprintDelay.Invalidate();
 	}
 }
-// END OF RUNNING 
+//*
 
-// SHOOTING
+//* SHOOTING | SERVER + CLIENT
 void AGameplayActor::SetShooting(bool Value)
+{
+	// if (Value)
+	// {
+	// 	M_WeaponComponent->ShootWeapon(M_PlayerCamera, this, M_MuzzleLocationComponent->GetComponentLocation());
+	// 	if (!m_isShooting) m_isShooting = true;
+	// }
+	// else
+	// {
+	// 	m_isShooting = false;
+	// }
+
+	if (!HasAuthority()) { Server_SetShooting(Value); }
+	else { Multi_SetShooting(Value); }
+}
+
+void AGameplayActor::Server_SetShooting_Implementation(bool Value)
+{
+	Multi_SetShooting(Value);
+}
+
+void AGameplayActor::Multi_SetShooting_Implementation(bool Value)
 {
 	if (Value)
 	{
@@ -250,6 +233,7 @@ void AGameplayActor::SetShooting(bool Value)
 		m_isShooting = false;
 	}
 }
+//*
 
 //* AIMING | CLIENT + SERVER
 void AGameplayActor::SetAiming(bool Value)

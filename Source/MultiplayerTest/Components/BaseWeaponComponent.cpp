@@ -142,8 +142,8 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 	FHitResult hitResult;
 	if (bool hitObject = UKismetSystemLibrary::LineTraceSingle(
 		this, startPoint, endPoint, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1),
-		true, TArray<AActor*>(), EDrawDebugTrace::ForDuration, hitResult,
-		true,FColor::White,FColor::Red, 0.1f))
+		true, TArray<AActor*>(), EDrawDebugTrace::None, hitResult,
+		true))
 	{
 		if (AActor* hitActor = hitResult.GetActor())
 		{
@@ -152,6 +152,7 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 				DealDamage(M_Damage, shooter, hitActor, hitHealth);
 			}
 		}
+		
 		SpawnBulletTracer(m_muzzleLocation, hitResult.Location, m_forwardVector.Rotation());
 	}
 	else { SpawnBulletTracer(m_muzzleLocation, endPoint, m_forwardVector.Rotation()); }
@@ -159,14 +160,8 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 
 void UBaseWeaponComponent::DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth)
 {
-	if (!GetOwner()->HasAuthority())
-	{
-		Server_DealDamage(Amount, Instigator, Victim, HitHealth);
-	}
-	else
-	{
-		Multi_DealDamage(Amount, Instigator, Victim, HitHealth);
-	}
+	if (!GetOwner()->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth); }
+	else { Multi_DealDamage(Amount, Instigator, Victim, HitHealth); }
 }
 
 bool UBaseWeaponComponent::Server_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim,

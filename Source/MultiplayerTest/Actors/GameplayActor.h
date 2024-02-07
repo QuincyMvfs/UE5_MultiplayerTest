@@ -42,7 +42,8 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	USpringArmComponent* M_CameraSpringArm;
-	
+
+	//* Actor Components
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UBaseWeaponComponent* M_WeaponComponent;
 
@@ -54,28 +55,27 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UWidgetComponent* M_HealthBar;
+	//*
 	
 public:
-	// Sets default values for this character's properties
 	AGameplayActor();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+//// CUSTOM FUNCTIONS
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	void SetPlayerMovementVector(FVector2d Value);
 
+	// Sets animation variables in the players Animation Blueprint
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
 
 	// SETS REPLICATED VARIABLES
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
+	//* CROUCHING | CLIENT + SERVER
 	UFUNCTION()
 	void SetCrouching(bool Value);
 
@@ -88,10 +88,15 @@ public:
 	void Multi_SetCrouching(bool Value);
 	bool Multi_SetCrouching_Validate(bool Value);
 	void Multi_SetCrouching_Implementation(bool Value);
-	
+	//*
+
+	//* RUNNING | CLIENT + SERVER
 	UFUNCTION()
 	void SetRunning(bool Value);
 
+	UFUNCTION()
+	void SetSprintingTrue();
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SetRunning(bool Value);
 	bool Server_SetRunning_Validate(bool Value);
@@ -102,9 +107,21 @@ public:
 	bool Multi_SetRunning_Validate(bool Value);
 	void Multi_SetRunning_Implementation(bool Value);
 
+	//*
+
+	//* SHOOTING | SERVER + CLIENT
 	UFUNCTION()
 	void SetShooting(bool Value);
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetShooting(bool Value);
+	void Server_SetShooting_Implementation(bool Value);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_SetShooting(bool Value);
+	void Multi_SetShooting_Implementation(bool Value);
+
+	//* AIMING | CLIENT + SERVER
 	UFUNCTION()
 	void SetAiming(bool Value);
 
@@ -115,17 +132,17 @@ public:
 	void Server_SetAiming(bool Value);
 	bool Server_SetAiming_Validate(bool Value);
 	void Server_SetAiming_Implementation(bool Value);
-
-	UFUNCTION()
-	void SetSprintingTrue();
-
-	UFUNCTION()
-	void TryJump();
+	//*
 
 	UFUNCTION()
 	void Reload();
 	
+	UFUNCTION()
+	void TryJump();
+
+//// VARIABLES
 public:
+	//* EDITABLE VARIABLES
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_ReloadSpeed = 1.2f;
 	
@@ -146,14 +163,14 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_AimingWalkingSpeed = 200.0f;
-
+	//*
+	
 	UPROPERTY(ReplicatedUsing = OnRep_SetAiming, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsAiming;
 	
 private:
 	FVector2d m_movementVector;
-
-	// Bools
+	
 	UPROPERTY(Replicated)
 	EMovementStates m_currentState;
 	
