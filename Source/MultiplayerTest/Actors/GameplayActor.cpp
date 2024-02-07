@@ -202,16 +202,6 @@ void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
 //* SHOOTING | SERVER + CLIENT
 void AGameplayActor::SetShooting(bool Value)
 {
-	// if (Value)
-	// {
-	// 	M_WeaponComponent->ShootWeapon(M_PlayerCamera, this, M_MuzzleLocationComponent->GetComponentLocation());
-	// 	if (!m_isShooting) m_isShooting = true;
-	// }
-	// else
-	// {
-	// 	m_isShooting = false;
-	// }
-
 	if (!HasAuthority()) { Server_SetShooting(Value); }
 	else { Multi_SetShooting(Value); }
 }
@@ -223,15 +213,23 @@ void AGameplayActor::Server_SetShooting_Implementation(bool Value)
 
 void AGameplayActor::Multi_SetShooting_Implementation(bool Value)
 {
-	if (Value)
+	if (Value && m_currentState != EMovementStates::Sprinting)
 	{
-		M_WeaponComponent->ShootWeapon(M_PlayerCamera, this, M_MuzzleLocationComponent->GetComponentLocation());
+		if (!M_WeaponComponent->M_IsReloading)
+		{
+			M_WeaponComponent->ShootWeapon(M_PlayerCamera, this,
+				M_MuzzleLocationComponent->GetComponentLocation());
+		}
+		else { m_isShooting = false; }
+		
 		if (!m_isShooting) m_isShooting = true;
 	}
-	else
+	else if (!Value)
 	{
 		m_isShooting = false;
 	}
+
+	if (m_isShooting == false && m_currentState == EMovementStates::Running) { SetRunning(true); }
 }
 //*
 
@@ -290,7 +288,7 @@ void AGameplayActor::OnRep_SetAiming()
 // MAKES THE PLAYER BEGIN SPRINTING
 void AGameplayActor::SetSprintingTrue()
 {
-	if (m_currentState == EMovementStates::Running && !M_IsAiming)
+	if (m_currentState == EMovementStates::Running && !M_IsAiming && !m_isShooting)
 	{
 		m_currentState = EMovementStates::Sprinting;
 		M_PlayerMovement->MaxWalkSpeed = M_SprintSpeed;
