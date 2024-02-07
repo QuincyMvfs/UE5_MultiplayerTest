@@ -10,6 +10,21 @@
 #include "TheBossGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
+struct FCreateServerInfo
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(BlueprintReadWrite)
+	FString ServerName;
+	UPROPERTY(BlueprintReadWrite)
+	int32 MaxPlayers;
+	UPROPERTY(BlueprintReadWrite)
+	bool IsLan;
+
+};
+
+USTRUCT(BlueprintType)
 struct FServerInfo
 {
 	GENERATED_BODY()
@@ -20,8 +35,12 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		FString PlayerCountStr;
 	UPROPERTY(BlueprintReadOnly)
-		int32 CurrentPlayers;
+		bool IsLan;
 	UPROPERTY(BlueprintReadOnly)
+		int32 Ping;
+	UPROPERTY()
+		int32 CurrentPlayers;
+	UPROPERTY()
 		int32 MaxPlayers;
 	UPROPERTY(BlueprintReadOnly)
 		int32 ServerArrayIndex;
@@ -102,7 +121,7 @@ protected:
 	virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	UFUNCTION(BlueprintCallable)
-	void CreateServer(FString ServerName, FString HostName);
+	void CreateServer(FCreateServerInfo InputServerInfo);
 
 	UFUNCTION(BlueprintCallable)
 	void FindServers();

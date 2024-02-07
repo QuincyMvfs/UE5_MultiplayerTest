@@ -68,6 +68,8 @@ void UTheBossGameInstance::OnFindSessionComplete(bool Succeeded)
 			Info.MaxPlayers = SearchResult.Session.SessionSettings.NumPublicConnections;
 			Info.CurrentPlayers = Info.MaxPlayers - SearchResult.Session.NumOpenPublicConnections;
 			Info.ServerArrayIndex = ArrayIndex;
+			Info.IsLan = SearchResult.Session.SessionSettings.bIsLANMatch;
+			Info.Ping = SearchResult.PingInMs;
 			Info.SetPlayerCount();
 			
 			OnFoundLobbyEvent.Broadcast(Info);
@@ -111,11 +113,12 @@ void UTheBossGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessi
 	}
 }
 
-void UTheBossGameInstance::CreateServer(FString ServerName, FString HostName)
+void UTheBossGameInstance::CreateServer(FCreateServerInfo InputServerInfo)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Create Server"));
 	FOnlineSessionSettings SessionSettings;
 	SessionSettings.bAllowJoinInProgress = true;
+	// InputServerInfo.IsLan would be put here.
 	SessionSettings.bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	SessionSettings.bAllowInvites = true;
 	SessionSettings.bIsDedicated = false;
@@ -126,11 +129,11 @@ void UTheBossGameInstance::CreateServer(FString ServerName, FString HostName)
 	SessionSettings.bAntiCheatProtected = false;
 	SessionSettings.bUsesStats = false;
 	SessionSettings.bShouldAdvertise = true;
-	SessionSettings.NumPublicConnections = 5;
-	SessionSettings.NumPrivateConnections  = 5;
+	SessionSettings.NumPublicConnections = InputServerInfo.MaxPlayers;
+	SessionSettings.NumPrivateConnections  = InputServerInfo.MaxPlayers;
 
-	SessionSettings.Set(FName("SERVER_NAME_KEY"), ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	SessionSettings.Set(FName("SERVER_HOSTNAME_KEY"), HostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	SessionSettings.Set(FName("SERVER_NAME_KEY"), InputServerInfo.ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	// SessionSettings.Set(FName("SERVER_HOSTNAME_KEY"), HostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	
 	SessionInterface->CreateSession(0, M_SessionName, SessionSettings);
 	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Session Create"));
