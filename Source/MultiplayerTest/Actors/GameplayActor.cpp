@@ -224,10 +224,7 @@ void AGameplayActor::Multi_SetShooting_Implementation(bool Value)
 		
 		if (!m_isShooting) m_isShooting = true;
 	}
-	else if (!Value)
-	{
-		m_isShooting = false;
-	}
+	else if (!Value) { m_isShooting = false; }
 
 	if (m_isShooting == false && m_currentState == EMovementStates::Running) { SetRunning(true); }
 }

@@ -149,7 +149,11 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 		{
 			if (UHealthComponent* hitHealth = hitActor->FindComponentByClass<UHealthComponent>())
 			{
-				DealDamage(M_Damage, shooter, hitActor, hitHealth);
+				APawn* PawnOwner = Cast<APawn>(shooter);
+				if (PawnOwner->IsLocallyControlled())
+				{
+					DealDamage(M_Damage, shooter, hitActor, hitHealth);
+				}
 			}
 		}
 		
