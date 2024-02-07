@@ -131,11 +131,13 @@ void AGameplayActor::Multi_SetCrouching_Implementation(bool Value)
 	else if (Value)
 	{
 		m_currentState = EMovementStates::Crouching;
+		M_PlayerMovement->Crouch();
 		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
 	}
 	else if (!Value)
 	{
 		m_currentState = EMovementStates::Idle;
+		M_PlayerMovement->UnCrouch();
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 	}
 }
