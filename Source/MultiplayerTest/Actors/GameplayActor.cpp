@@ -9,6 +9,8 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
+#include "MultiplayerTest/GameplayPlayerController.h"
+#include "MultiplayerTest/MultiplayerTestGameModeBase.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
 #include "MultiplayerTest/Components/HealthComponent.h"
@@ -41,20 +43,25 @@ AGameplayActor::AGameplayActor()
 	M_PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	M_PlayerCamera->SetupAttachment(M_CameraSpringArm);
 	M_PlayerCamera-> bUsePawnControlRotation = true;
-	
 
 	// Custom Classes
 	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));
 	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
 	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
 	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	M_PlayerHealthComponent->OnKilledEvent.AddDynamic(this, &AGameplayActor::SetDead);
+
+	// UI
 	M_HealthBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
 	M_HealthBar->SetupAttachment(M_PlayerModelSKC, "HeadTop_End");
 }
 //*
 
 // Called when the game starts or when spawned
-void AGameplayActor::BeginPlay() { Super::BeginPlay();}
+void AGameplayActor::BeginPlay()
+{
+	Super::BeginPlay();
+}
 
 // FORCIBLY SETS THE PLAYERS MOVEMENT VECTOR
 void AGameplayActor::SetPlayerMovementVector(FVector2d Value) { m_movementVector = Value; }
@@ -70,7 +77,7 @@ void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bo
 	bIsHit = M_PlayerHealthComponent->M_IsHit;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
-	CurrentState = m_currentState;
+	CurrentState = M_CurrentState;
 	
 }
 
@@ -80,7 +87,7 @@ void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(AGameplayActor, M_IsAiming, COND_SkipOwner);
-	DOREPLIFETIME(AGameplayActor, m_currentState);
+	DOREPLIFETIME(AGameplayActor, M_CurrentState);
 	DOREPLIFETIME(AGameplayActor, m_currentSpeed);
 	DOREPLIFETIME(AGameplayActor, m_currentVelocity);
 	DOREPLIFETIME(AGameplayActor, m_isShooting);
@@ -89,21 +96,23 @@ void AGameplayActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 //* CROUCHING | CLIENT + SERVER
 void AGameplayActor::SetCrouching(bool Value)
 {
-	if (m_currentState == EMovementStates::Running
-		|| m_currentState == EMovementStates::Sprinting
-		|| m_currentState == EMovementStates::Jumping)
+	if (M_CurrentState == EMovementStates::Dead) return;
+
+	if (M_CurrentState == EMovementStates::Running
+		|| M_CurrentState == EMovementStates::Sprinting
+		|| M_CurrentState == EMovementStates::Jumping)
 	{
 		// Do nothing
 	}
 	else if (Value)
 	{
-		m_currentState = EMovementStates::Crouching;
+		M_CurrentState = EMovementStates::Crouching;
 		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
 		M_CameraZoomComponent->CrouchWithCamera(true);
 	}
 	else if (!Value)
 	{
-		m_currentState = EMovementStates::Idle;
+		M_CurrentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		M_CameraZoomComponent->CrouchWithCamera(false);
 	}
@@ -123,21 +132,21 @@ void AGameplayActor::Server_SetCrouching_Implementation(bool Value)
 bool AGameplayActor::Multi_SetCrouching_Validate(bool Value) { return true; }
 void AGameplayActor::Multi_SetCrouching_Implementation(bool Value)
 {
-	if (m_currentState == EMovementStates::Running
-	|| m_currentState == EMovementStates::Sprinting
-	|| m_currentState == EMovementStates::Jumping)
+	if (M_CurrentState == EMovementStates::Running
+	|| M_CurrentState == EMovementStates::Sprinting
+	|| M_CurrentState == EMovementStates::Jumping)
 	{
 		// Do nothing
 	}
 	else if (Value)
 	{
-		m_currentState = EMovementStates::Crouching;
+		M_CurrentState = EMovementStates::Crouching;
 		M_PlayerMovement->Crouch();
 		M_PlayerMovement->MaxWalkSpeed = M_CrouchSpeed;
 	}
 	else if (!Value)
 	{
-		m_currentState = EMovementStates::Idle;
+		M_CurrentState = EMovementStates::Idle;
 		M_PlayerMovement->UnCrouch();
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 	}
@@ -147,11 +156,12 @@ void AGameplayActor::Multi_SetCrouching_Implementation(bool Value)
 //* RUNNING CLIENT + SERVER
 void AGameplayActor::SetRunning(bool Value)
 {
-	FTimerHandle SprintDelay;
+	if (M_CurrentState == EMovementStates::Dead) return;
 	
+	FTimerHandle SprintDelay;
 	if (Value && !M_IsAiming)
 	{
-		m_currentState = EMovementStates::Running;
+		M_CurrentState = EMovementStates::Running;
 		M_PlayerMovement->MaxWalkSpeed = M_RunSpeed;
 		if (GetWorld())
 		{
@@ -161,7 +171,7 @@ void AGameplayActor::SetRunning(bool Value)
 	}
 	else if (!Value && !M_IsAiming)
 	{
-		m_currentState = EMovementStates::Idle;
+		M_CurrentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		SprintDelay.Invalidate();
 	}
@@ -185,7 +195,7 @@ void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
 	
 	if (Value && !M_IsAiming)
 	{
-		m_currentState = EMovementStates::Running;
+		M_CurrentState = EMovementStates::Running;
 		M_PlayerMovement->MaxWalkSpeed = M_RunSpeed;
 		if (GetWorld())
 		{
@@ -195,7 +205,7 @@ void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
 	}
 	else if (!Value && !M_IsAiming)
 	{
-		m_currentState = EMovementStates::Idle;
+		M_CurrentState = EMovementStates::Idle;
 		M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed;
 		SprintDelay.Invalidate();
 	}
@@ -205,6 +215,8 @@ void AGameplayActor::Multi_SetRunning_Implementation(bool Value)
 //* SHOOTING | SERVER + CLIENT
 void AGameplayActor::SetShooting(bool Value)
 {
+	if (M_CurrentState == EMovementStates::Dead) return;
+	
 	if (!HasAuthority()) { Server_SetShooting(Value); }
 	else { Multi_SetShooting(Value); }
 }
@@ -216,7 +228,7 @@ void AGameplayActor::Server_SetShooting_Implementation(bool Value)
 
 void AGameplayActor::Multi_SetShooting_Implementation(bool Value)
 {
-	if (Value && m_currentState != EMovementStates::Sprinting)
+	if (Value && M_CurrentState != EMovementStates::Sprinting)
 	{
 		if (!M_WeaponComponent->M_IsReloading)
 		{
@@ -229,13 +241,15 @@ void AGameplayActor::Multi_SetShooting_Implementation(bool Value)
 	}
 	else if (!Value) { m_isShooting = false; }
 
-	if (m_isShooting == false && m_currentState == EMovementStates::Running) { SetRunning(true); }
+	if (m_isShooting == false && M_CurrentState == EMovementStates::Running) { SetRunning(true); }
 }
 //*
 
 //* AIMING | CLIENT + SERVER
 void AGameplayActor::SetAiming(bool Value)
 {
+	if (M_CurrentState == EMovementStates::Dead) return;
+	
 	if (Value)
 	{
 		M_IsAiming = true;
@@ -245,7 +259,7 @@ void AGameplayActor::SetAiming(bool Value)
 	else
 	{
 		M_IsAiming = false;
-		if (m_currentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
+		if (M_CurrentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 		M_CameraZoomComponent->ZoomCamera(false);
 	}
 
@@ -264,7 +278,7 @@ void AGameplayActor::Server_SetAiming_Implementation(bool Value)
 	else
 	{
 		M_IsAiming = false;
-		if (m_currentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
+		if (M_CurrentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 	}
 	
 	OnRep_SetAiming();
@@ -272,6 +286,8 @@ void AGameplayActor::Server_SetAiming_Implementation(bool Value)
 
 void AGameplayActor::OnRep_SetAiming()
 {
+	if (M_CurrentState == EMovementStates::Dead) return;
+
 	if (M_IsAiming)
 	{
 		M_IsAiming = true;
@@ -280,7 +296,7 @@ void AGameplayActor::OnRep_SetAiming()
 	else
 	{
 		M_IsAiming = false;
-		if (m_currentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
+		if (M_CurrentState != EMovementStates::Crouching) { M_PlayerMovement->MaxWalkSpeed = M_WalkSpeed; }
 	}
 }
 //*
@@ -288,9 +304,11 @@ void AGameplayActor::OnRep_SetAiming()
 // MAKES THE PLAYER BEGIN SPRINTING
 void AGameplayActor::SetSprintingTrue()
 {
-	if (m_currentState == EMovementStates::Running && !M_IsAiming && !m_isShooting)
+	if (M_CurrentState == EMovementStates::Dead) return;
+
+	if (M_CurrentState == EMovementStates::Running && !M_IsAiming && !m_isShooting)
 	{
-		m_currentState = EMovementStates::Sprinting;
+		M_CurrentState = EMovementStates::Sprinting;
 		M_PlayerMovement->MaxWalkSpeed = M_SprintSpeed;
 	}
 }
@@ -298,8 +316,10 @@ void AGameplayActor::SetSprintingTrue()
 // JUMP
 void AGameplayActor::TryJump()
 {
-	if (!M_IsAiming && m_currentState != EMovementStates::Jumping
-		&& m_currentState != EMovementStates::Crouching)
+	if (M_CurrentState == EMovementStates::Dead) return;
+
+	if (!M_IsAiming && M_CurrentState != EMovementStates::Jumping
+		&& M_CurrentState != EMovementStates::Crouching)
 	{
 		ACharacter::Jump();
 	}
@@ -307,7 +327,37 @@ void AGameplayActor::TryJump()
 
 void AGameplayActor::Reload()
 {
+	if (M_CurrentState == EMovementStates::Dead) return;
+
 	M_WeaponComponent->TryReload();
 }
 
+void AGameplayActor::SetDead(AActor* Killer)
+{
+	M_CurrentState = EMovementStates::Dead;
+	M_PlayerCapsuleComponent->SetCollisionProfileName("Pawn");
+	OnRespawnEvent.Broadcast();
 
+	if (GetWorld())
+	{
+		FTimerHandle RespawnTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			RespawnTimer, this, &AGameplayActor::Respawn, M_RespawnDelay);
+	}
+}
+
+void AGameplayActor::Respawn()
+{
+	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
+	{
+		if (AGameplayPlayerController* PlayerController = GetController<AGameplayPlayerController>())
+		{
+			GM->RespawnPlayer(PlayerController);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
+	FString::Printf(TEXT("PLAYER CONTROLLER NULL")));
+		}
+	}
+}

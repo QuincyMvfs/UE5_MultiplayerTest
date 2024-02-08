@@ -7,6 +7,7 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamaged, float, HealthPercent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, Killer);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UHealthComponent : public UActorComponent
@@ -25,7 +26,9 @@ protected:
 
 public:
 	UPROPERTY(BlueprintAssignable)
-	FOnDamaged OnDamagedEvent;
+		FOnDamaged OnDamagedEvent;
+	UPROPERTY(BlueprintAssignable)
+		FOnKilled OnKilledEvent;
 	
 	UFUNCTION(BlueprintCallable, Category = Health)
 	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
@@ -46,6 +49,9 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere)
 	bool M_IsHit = false;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	bool M_IsDead = false;
 	
 protected:
 	UPROPERTY(Replicated)

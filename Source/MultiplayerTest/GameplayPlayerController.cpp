@@ -3,8 +3,10 @@
 
 #include "GameplayPlayerController.h"
 
+#include "EMovementStates.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "MultiplayerTestGameModeBase.h"
 #include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
 #include "Engine/LocalPlayer.h"
@@ -16,7 +18,11 @@ AGameplayPlayerController::AGameplayPlayerController()
 
 void AGameplayPlayerController::BeginPlay()
 {
-	M_PossessedPawn = Cast<AGameplayActor>(GetPawn());
+	if (IsLocalPlayerController())
+	{
+		Server_SpawnPlayer();
+	}
+	
 	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -27,7 +33,29 @@ void AGameplayPlayerController::BeginPlay()
 	}
 	
 	SetupInputComponent();
-	Possess(M_PossessedPawn);
+}
+
+void AGameplayPlayerController::SpawnPlayer()
+{
+	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
+	{
+		GM->RespawnPlayer(this);
+	}
+}
+
+bool AGameplayPlayerController::Server_SpawnPlayer_Validate()
+{
+	return true;
+}
+
+void AGameplayPlayerController::Server_SpawnPlayer_Implementation()
+{
+	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
+	{
+		GM->RespawnPlayer(this);
+		UE_LOG(LogTemp, Error, TEXT("Possessed Pawn: %s | CONTROLLER: %s"), *M_PossessedPawn->GetName(), *GetName());
+
+	}
 }
 
 void AGameplayPlayerController::SetupInputComponent()
@@ -59,13 +87,8 @@ void AGameplayPlayerController::SetupInputComponent()
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
 
-			// // Aiming
-			// EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
-			// EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
-
 			// Reloading
 			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, M_PossessedPawn, &AGameplayActor::Reload);
-			// EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Completed, M_PossessedPawn, &AGameplayActor::TryReload);
 		}
 	}
 }
@@ -86,7 +109,7 @@ void AGameplayPlayerController::Look(const FInputActionValue& Value)
 {
 	const FVector2d LookAxisVector = Value.Get<FVector2d>();
 
-	if (M_PossessedPawn)
+	if (M_PossessedPawn && M_PossessedPawn->M_CurrentState != EMovementStates::Dead)
 	{
 		if (M_PossessedPawn->M_IsAiming && M_GameInstanceRef)
 		{

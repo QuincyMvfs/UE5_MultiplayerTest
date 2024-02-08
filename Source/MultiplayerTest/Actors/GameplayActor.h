@@ -16,6 +16,8 @@ class UInputMappingContext;
 class USpringArmComponent;
 class UCameraComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRespawn);
+
 UCLASS()
 class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 {
@@ -64,7 +66,10 @@ protected:
 	virtual void BeginPlay() override;
 
 //// CUSTOM FUNCTIONS
-public:	
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnRespawn OnRespawnEvent;
+	
 	void SetPlayerMovementVector(FVector2d Value);
 
 	// Sets animation variables in the players Animation Blueprint
@@ -135,6 +140,12 @@ public:
 	//*
 
 	UFUNCTION()
+	void SetDead(AActor* Killer);
+
+	UFUNCTION()
+	void Respawn();
+	
+	UFUNCTION()
 	void Reload();
 	
 	UFUNCTION()
@@ -163,16 +174,20 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float M_AimingWalkingSpeed = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Respawn")
+	float M_RespawnDelay = 5.0f;
 	//*
 	
 	UPROPERTY(ReplicatedUsing = OnRep_SetAiming, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsAiming;
 	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	EMovementStates M_CurrentState;
+	
 private:
 	FVector2d m_movementVector;
 	
-	UPROPERTY(Replicated)
-	EMovementStates m_currentState;
 	
 	UPROPERTY(Replicated)
 	float m_currentSpeed;

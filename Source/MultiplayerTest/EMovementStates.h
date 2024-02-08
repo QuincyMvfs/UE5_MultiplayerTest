@@ -17,6 +17,7 @@ enum class EMovementStates:uint8
 	Running,
 	Sprinting,
 	Crouching,
-	Jumping
+	Jumping,
+	Dead
 };
 

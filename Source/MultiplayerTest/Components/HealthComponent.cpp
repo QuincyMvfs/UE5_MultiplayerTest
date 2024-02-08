@@ -20,6 +20,8 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	m_currentHealth = M_MaxHealth;
+	M_IsDead = false;
+	M_IsHit = false;
 }
 
 void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -28,6 +30,7 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UHealthComponent, m_currentHealth);
 	DOREPLIFETIME(UHealthComponent, M_IsHit);
+	DOREPLIFETIME(UHealthComponent, M_IsDead);
 }
 
 void UHealthComponent::TakeDamage(float Amount, AActor* Instigator, AActor* Victim)
@@ -44,6 +47,11 @@ void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Ins
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
 		OnDamagedEvent.Broadcast(m_currentHealth / M_MaxHealth);
 		SetIsHit();
+	}
+	else if (m_currentHealth <= 0)
+	{
+		OnKilledEvent.Broadcast(Instigator);
+		M_IsDead = true;
 	}
 }
 
