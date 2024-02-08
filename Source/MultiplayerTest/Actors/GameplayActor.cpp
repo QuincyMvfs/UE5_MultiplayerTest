@@ -60,13 +60,14 @@ void AGameplayActor::BeginPlay() { Super::BeginPlay();}
 void AGameplayActor::SetPlayerMovementVector(FVector2d Value) { m_movementVector = Value; }
 
 // GETS THE VARIABLES USED BY THE ABP
-void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
-	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState)
+void AGameplayActor::GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bIsReloading,
+	bool& bIsHit, float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState)
 {
 	bIsFalling = M_PlayerMovement->IsFalling();
 	bIsAiming = M_IsAiming;
 	bIsShooting = m_isShooting;
-	bisReloading = M_WeaponComponent->M_IsReloading;
+	bIsReloading = M_WeaponComponent->M_IsReloading;
+	bIsHit = M_PlayerHealthComponent->M_IsHit;
 	CurrentSpeed = GetVelocity().Size();
 	CurrentVelocity = GetVelocity();
 	CurrentState = m_currentState;

@@ -34,11 +34,21 @@ public:
 	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
 	bool Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim);
 	void Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim);
+
+	void SetIsHit();
+	void SetIsNotHit();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float M_MaxHealth = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float M_HitDuration = 0.2f;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	bool M_IsHit = false;
+	
 protected:
 	UPROPERTY(Replicated)
 	float m_currentHealth;
+
 };

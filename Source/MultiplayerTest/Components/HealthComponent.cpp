@@ -27,6 +27,7 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UHealthComponent, m_currentHealth);
+	DOREPLIFETIME(UHealthComponent, M_IsHit);
 }
 
 void UHealthComponent::TakeDamage(float Amount, AActor* Instigator, AActor* Victim)
@@ -42,6 +43,20 @@ void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Ins
 		m_currentHealth -= Amount;
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
 		OnDamagedEvent.Broadcast(m_currentHealth / M_MaxHealth);
+		SetIsHit();
 	}
+}
+
+void UHealthComponent::SetIsHit()
+{
+	M_IsHit = true;
+	FTimerHandle HitTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		HitTimer, this, &UHealthComponent::SetIsNotHit, M_HitDuration);
+}
+
+void UHealthComponent::SetIsNotHit()
+{
+	M_IsHit = false;
 }
 

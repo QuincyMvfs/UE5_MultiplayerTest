@@ -69,7 +69,7 @@ public:
 
 	// Sets animation variables in the players Animation Blueprint
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bisReloading,
+	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bIsReloading, bool& bIsHit,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
 
 	// SETS REPLICATED VARIABLES
