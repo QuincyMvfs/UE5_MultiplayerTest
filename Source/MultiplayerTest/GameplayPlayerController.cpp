@@ -18,21 +18,18 @@ AGameplayPlayerController::AGameplayPlayerController()
 
 void AGameplayPlayerController::BeginPlay()
 {
-	if (IsLocalPlayerController())
-	{
-		Server_SpawnPlayer();
-	}
 	
-	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
+		M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
+		
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(M_MovementMappingContext, 0);
+			Subsystem->AddMappingContext(M_CombatMappingContext, 1);
+		}
+		
+		SetupInputComponent();
 	
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
-		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(M_MovementMappingContext, 0);
-		Subsystem->AddMappingContext(M_CombatMappingContext, 1);
-	}
-	
-	SetupInputComponent();
 }
 
 void AGameplayPlayerController::SpawnPlayer()
@@ -55,6 +52,10 @@ void AGameplayPlayerController::Server_SpawnPlayer_Implementation()
 		GM->RespawnPlayer(this);
 		UE_LOG(LogTemp, Error, TEXT("Possessed Pawn: %s | CONTROLLER: %s"), *M_PossessedPawn->GetName(), *GetName());
 
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NO GAME MODE"));
 	}
 }
 

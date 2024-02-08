@@ -26,7 +26,7 @@ public:
 
 	virtual void FindPlayerStarts();
 	virtual APlayerStart* GetPlayerSpawnPoint();
-	virtual void RespawnPlayer(APlayerController* PlayerToRespawn);
+	virtual void RespawnPlayer(AController* PlayerToRespawn);
 
 public:
 	UPROPERTY(VisibleAnywhere)

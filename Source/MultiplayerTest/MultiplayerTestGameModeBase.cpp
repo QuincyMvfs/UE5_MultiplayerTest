@@ -43,29 +43,32 @@ void AMultiplayerTestGameModeBase::Logout(AController* Exiting)
 	}
 }
 
-void AMultiplayerTestGameModeBase::RespawnPlayer(APlayerController* PlayerToRespawn)
+void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
 {
-	if (APawn* PlayerPawn = PlayerToRespawn->GetPawn())
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan,
-		FString::Printf(TEXT("Controller has a pawn, destroying it")));
-
-		PlayerPawn->Destroy();
-	}
-	
-	if (UWorld* World = GetWorld())
-	{
-		FindPlayerStarts();
-		
-		if (PlayerStarts.Num() > 0)
+		if (APawn* PlayerPawn = PlayerToRespawn->GetPawn())
 		{
-			if (AGameplayPlayerController* GPC = Cast<AGameplayPlayerController>(PlayerToRespawn))
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan,
+			FString::Printf(TEXT("Controller has a pawn, destroying it")));
+
+			PlayerPawn->Destroy();
+		}
+		
+		if (UWorld* World = GetWorld())
+		{
+			FindPlayerStarts();
+			
+			if (PlayerStarts.Num() > 0)
 			{
-				APlayerStart* SpawnPoint = GetPlayerSpawnPoint();
-				AGameplayActor* SpawnedActor = World->SpawnActor<AGameplayActor>(BP_PlayerActor,
-					SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
-				GPC->M_PossessedPawn = SpawnedActor;
-				PlayerToRespawn->Possess(SpawnedActor);
+				if (AGameplayPlayerController* GPC = Cast<AGameplayPlayerController>(PlayerToRespawn))
+				{
+					APlayerStart* SpawnPoint = GetPlayerSpawnPoint();
+					APawn* SpawnedPawn = World->SpawnActor<APawn>(BP_PlayerActor,
+						SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
+					// GPC->M_PossessedPawn = SpawnedActor;
+					PlayerToRespawn->Possess(SpawnedPawn);
+				}
 			}
 		}
 	}
