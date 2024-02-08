@@ -52,6 +52,8 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 public:
 	AGameplayPlayerController();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	
@@ -82,6 +84,9 @@ public:
 
 public:
 	FVector2d M_MovementVector;
+	
+	UPROPERTY(Replicated)
 	AGameplayActor* M_PossessedPawn;
+	
 	UTheBossGameInstance* M_GameInstanceRef;
 };

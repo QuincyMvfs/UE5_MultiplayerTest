@@ -10,26 +10,34 @@
 #include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
 #include "Engine/LocalPlayer.h"
+#include "Net/UnrealNetwork.h"
 
 AGameplayPlayerController::AGameplayPlayerController()
 {
 	
 }
 
+void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGameplayPlayerController, M_PossessedPawn);
+}
+
 void AGameplayPlayerController::BeginPlay()
 {
+	// M_PossessedPawn = Cast<AGameplayActor>(GetPawn());
+	// Possess(M_PossessedPawn);
+	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
-		M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
-		
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
-			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(M_MovementMappingContext, 0);
-			Subsystem->AddMappingContext(M_CombatMappingContext, 1);
-		}
-		
-		SetupInputComponent();
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
+		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(M_MovementMappingContext, 0);
+		Subsystem->AddMappingContext(M_CombatMappingContext, 1);
+	}
 	
+	SetupInputComponent();
 }
 
 void AGameplayPlayerController::SpawnPlayer()
