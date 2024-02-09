@@ -23,6 +23,8 @@ void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 void AGameplayPlayerController::BeginPlay()
 {
+	M_PossessedPawn = Cast<AGameplayActor>(GetPawn());
+	Possess(M_PossessedPawn);
 	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -91,6 +93,8 @@ void AGameplayPlayerController::Jump(const FInputActionValue& Value)
 
 void AGameplayPlayerController::Look(const FInputActionValue& Value)
 {
+	
+	
 	const FVector2d LookAxisVector = Value.Get<FVector2d>();
 
 	if (M_PossessedPawn && M_PossessedPawn->M_CurrentState != EMovementStates::Dead)

@@ -32,20 +32,20 @@ void AMultiplayerTestGameModeBase::PostLogin(APlayerController* NewPlayer)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
 		FString::Printf(TEXT("Player Joined: %s"), *M_Players.Last()->GetName()));
 
-	if (AGameplayPlayerController* GPC = Cast<AGameplayPlayerController>(NewPlayer))
-	{
-		RespawnPlayer(GPC);
-	}
+	// if (AGameplayPlayerController* GPC = Cast<AGameplayPlayerController>(NewPlayer))
+	// {
+	// 	RespawnPlayer(GPC);
+	// }
 }
 
 void AMultiplayerTestGameModeBase::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
 
-	if (APlayerController* PC = Cast<APlayerController>(Exiting))
-	{
-		M_Players.Remove(PC);
-	}
+	// if (APlayerController* PC = Cast<APlayerController>(Exiting))
+	// {
+	// 	M_Players.Remove(PC);
+	// }
 }
 
 void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
