@@ -57,16 +57,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	
-	void SpawnPlayer();
-	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SpawnPlayer();
-	bool Server_SpawnPlayer_Validate();
-	void Server_SpawnPlayer_Implementation();
-	
 	UFUNCTION(BlueprintCallable)
 	void Move(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void Jump(const FInputActionValue& Value);
+	
 	UFUNCTION(BlueprintCallable)
 	void Look(const FInputActionValue& Value);
 
@@ -81,6 +77,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Aim(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void Reload(const FInputActionValue& Value);
 
 public:
 	FVector2d M_MovementVector;

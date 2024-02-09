@@ -327,6 +327,8 @@ void AGameplayActor::TryJump()
 
 void AGameplayActor::Reload()
 {
+	UE_LOG(LogTemp, Warning, TEXT("SHITTER"));
+	
 	if (M_CurrentState == EMovementStates::Dead) return;
 
 	M_WeaponComponent->TryReload();

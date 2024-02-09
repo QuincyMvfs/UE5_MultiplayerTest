@@ -12,10 +12,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Net/UnrealNetwork.h"
 
-AGameplayPlayerController::AGameplayPlayerController()
-{
-	
-}
+AGameplayPlayerController::AGameplayPlayerController() { }
 
 void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -26,8 +23,6 @@ void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 void AGameplayPlayerController::BeginPlay()
 {
-	// M_PossessedPawn = Cast<AGameplayActor>(GetPawn());
-	// Possess(M_PossessedPawn);
 	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -38,33 +33,6 @@ void AGameplayPlayerController::BeginPlay()
 	}
 	
 	SetupInputComponent();
-}
-
-void AGameplayPlayerController::SpawnPlayer()
-{
-	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
-	{
-		GM->RespawnPlayer(this);
-	}
-}
-
-bool AGameplayPlayerController::Server_SpawnPlayer_Validate()
-{
-	return true;
-}
-
-void AGameplayPlayerController::Server_SpawnPlayer_Implementation()
-{
-	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
-	{
-		GM->RespawnPlayer(this);
-		UE_LOG(LogTemp, Error, TEXT("Possessed Pawn: %s | CONTROLLER: %s"), *M_PossessedPawn->GetName(), *GetName());
-
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("NO GAME MODE"));
-	}
 }
 
 void AGameplayPlayerController::SetupInputComponent()
@@ -78,7 +46,9 @@ void AGameplayPlayerController::SetupInputComponent()
 			// Movement
 			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Move);
 			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Look);
-			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered, M_PossessedPawn, &AGameplayActor::TryJump);
+
+			// Jumping
+			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Jump);
 
 			// Crouching
 			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Crouch);
@@ -97,7 +67,7 @@ void AGameplayPlayerController::SetupInputComponent()
 			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
 
 			// Reloading
-			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, M_PossessedPawn, &AGameplayActor::Reload);
+			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Reload);
 		}
 	}
 }
@@ -112,6 +82,11 @@ void AGameplayPlayerController::Move(const FInputActionValue& Value)
 		M_PossessedPawn->AddMovementInput(M_PossessedPawn->GetActorForwardVector(), M_MovementVector.Y);
 		M_PossessedPawn->AddMovementInput(M_PossessedPawn->GetActorRightVector(), M_MovementVector.X);
 	}
+}
+
+void AGameplayPlayerController::Jump(const FInputActionValue& Value)
+{
+	if (M_PossessedPawn) M_PossessedPawn->TryJump();
 }
 
 void AGameplayPlayerController::Look(const FInputActionValue& Value)
@@ -155,4 +130,9 @@ void AGameplayPlayerController::Aim(const FInputActionValue& Value)
 {
 	const bool isAiming = Value.Get<bool>();
 	if (M_PossessedPawn) M_PossessedPawn->SetAiming(isAiming);
+}
+
+void AGameplayPlayerController::Reload(const FInputActionValue& Value)
+{
+	if (M_PossessedPawn) M_PossessedPawn->Reload();
 }
