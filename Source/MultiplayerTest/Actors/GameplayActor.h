@@ -142,6 +142,14 @@ public:
 	UFUNCTION()
 	void SetDead(AActor* Killer);
 
+	// UFUNCTION(NetMulticast, Reliable)
+	// void Server_SetDead(AActor* Killer);
+	// void Server_SetDead_Implementation(AActor* Killer);
+	//
+	// UFUNCTION(NetMulticast, Reliable)
+	// void Multi_SetDead(AActor* Killer);
+	// void Multi_SetDead_Implementation(AActor* Killer);
+
 	UFUNCTION()
 	void Respawn();
 	

@@ -152,7 +152,7 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 				APawn* PawnOwner = Cast<APawn>(GetOwner());
 				if (PawnOwner->IsLocallyControlled())
 				{
-					DealDamage(M_Damage, shooter, hitActor, hitHealth);
+					DealDamage(M_Damage, shooter, hitActor, hitHealth, hitResult.BoneName);
 				}
 			}
 		}
@@ -162,38 +162,39 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 	else { SpawnBulletTracer(m_muzzleLocation, endPoint, m_forwardVector.Rotation()); }
 }
 
-void UBaseWeaponComponent::DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth)
+void UBaseWeaponComponent::DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone)
 {
-	if (!GetOwner()->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth); }
-	else { Multi_DealDamage(Amount, Instigator, Victim, HitHealth); }
+	if (!GetOwner()->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
+	else { Multi_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
 }
 
 bool UBaseWeaponComponent::Server_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim,
-	UHealthComponent* HitHealth) { return true; }
+	UHealthComponent* HitHealth, FName HitBone) { return true; }
 void UBaseWeaponComponent::Server_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim,
-	UHealthComponent* HitHealth)
+	UHealthComponent* HitHealth, FName HitBone)
 {
-	Multi_DealDamage(Amount, Instigator, Victim, HitHealth);
+	Multi_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone);
 }
 
 bool UBaseWeaponComponent::Multi_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim,
-	UHealthComponent* HitHealth) { return true;}
+	UHealthComponent* HitHealth, FName HitBone) { return true;}
 void UBaseWeaponComponent::Multi_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim,
-	UHealthComponent* HitHealth)
+	UHealthComponent* HitHealth, FName HitBone)
 {
-	HitHealth->TakeDamage(Amount, Instigator, Victim);
-	if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
-	{
-		GM->PlayerHit();
-	}
-
-	if (AGameplayActor* InstigatorPlayer = Cast<AGameplayActor>(GetOwner()))
-	{
-		if (AGameplayPlayerState* PS = InstigatorPlayer->GetPlayerState<AGameplayPlayerState>())
-		{
-			PS->PlayerHit();
-		}
-	}
+	HitHealth->TakeDamage(Amount, Instigator, Victim, HitBone);
+	
+	// if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
+	// {
+	// 	GM->PlayerHit();
+	// }
+	//
+	// if (AGameplayActor* InstigatorPlayer = Cast<AGameplayActor>(GetOwner()))
+	// {
+	// 	if (AGameplayPlayerState* PS = InstigatorPlayer->GetPlayerState<AGameplayPlayerState>())
+	// 	{
+	// 		PS->PlayerHit();
+	// 	}
+	// }
 }
 
 void UBaseWeaponComponent::SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation)

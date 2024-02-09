@@ -33,26 +33,38 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHealthComponent, M_IsDead);
 }
 
-void UHealthComponent::TakeDamage(float Amount, AActor* Instigator, AActor* Victim)
+void UHealthComponent::TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone)
 {
-	if (GetOwner()->HasAuthority()) { Multi_TakeDamage(Amount, Instigator, Victim); }
+	if (GetOwner()->HasAuthority()) { Multi_TakeDamage(Amount, Instigator, Victim, HitBone); }
 }
 
-bool UHealthComponent::Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim) { return true; }
-void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim)
+bool UHealthComponent::Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, FName HitBone) { return true; }
+void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, FName HitBone)
 {
 	if (m_currentHealth > 0)
 	{
-		m_currentHealth -= Amount;
+		const float MultipliedAmount = GetMultipliedDamage(Amount, HitBone);
+		m_currentHealth -= MultipliedAmount;
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
 		OnDamagedEvent.Broadcast(m_currentHealth / M_MaxHealth);
 		SetIsHit();
 	}
-	else if (m_currentHealth <= 0)
+
+	if (m_currentHealth <= 0)
 	{
 		OnKilledEvent.Broadcast(Instigator);
 		M_IsDead = true;
 	}
+}
+
+float UHealthComponent::GetMultipliedDamage(float BaseDamage, FName HitBone)
+{
+	if (M_BoneMultiplier.Contains(HitBone))
+	{
+		return BaseDamage * M_BoneMultiplier[HitBone];
+	}
+
+	return BaseDamage;
 }
 
 void UHealthComponent::SetIsHit()

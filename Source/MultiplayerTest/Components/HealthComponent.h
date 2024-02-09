@@ -29,15 +29,20 @@ public:
 		FOnDamaged OnDamagedEvent;
 	UPROPERTY(BlueprintAssignable)
 		FOnKilled OnKilledEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FName, float> M_BoneMultiplier;
 	
 	UFUNCTION(BlueprintCallable, Category = Health)
-	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
+	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim);
-	bool Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim);
-	void Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim);
+	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
+	bool Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
+	void Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
 
+	float GetMultipliedDamage(float BaseDamage, FName HitBone);
+	
 	void SetIsHit();
 	void SetIsNotHit();
 	
@@ -56,5 +61,4 @@ public:
 protected:
 	UPROPERTY(Replicated)
 	float m_currentHealth;
-
 };

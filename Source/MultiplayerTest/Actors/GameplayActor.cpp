@@ -327,8 +327,6 @@ void AGameplayActor::TryJump()
 
 void AGameplayActor::Reload()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SHITTER"));
-	
 	if (M_CurrentState == EMovementStates::Dead) return;
 
 	M_WeaponComponent->TryReload();
@@ -337,7 +335,8 @@ void AGameplayActor::Reload()
 void AGameplayActor::SetDead(AActor* Killer)
 {
 	M_CurrentState = EMovementStates::Dead;
-	M_PlayerCapsuleComponent->SetCollisionProfileName("Pawn");
+	M_PlayerCapsuleComponent->SetCollisionProfileName("DeadPlayer");
+	M_CameraSpringArm->bDoCollisionTest = false;
 	
 	OnRespawnEvent.Broadcast();
 
@@ -347,6 +346,7 @@ void AGameplayActor::SetDead(AActor* Killer)
 		GetWorld()->GetTimerManager().SetTimer(
 			RespawnTimer, this, &AGameplayActor::Respawn, M_RespawnDelay);
 	}
+	
 }
 
 void AGameplayActor::Respawn()
