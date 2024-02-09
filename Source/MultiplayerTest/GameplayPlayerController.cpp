@@ -23,7 +23,6 @@ void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 void AGameplayPlayerController::BeginPlay()
 {
-	M_PossessedPawn = Cast<AGameplayActor>(GetPawn());
 	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -34,7 +33,6 @@ void AGameplayPlayerController::BeginPlay()
 	}
 	
 	SetupInputComponent();
-	Possess(M_PossessedPawn);
 }
 
 void AGameplayPlayerController::SetupInputComponent()

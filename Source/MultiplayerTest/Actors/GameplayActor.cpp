@@ -338,6 +338,7 @@ void AGameplayActor::SetDead(AActor* Killer)
 {
 	M_CurrentState = EMovementStates::Dead;
 	M_PlayerCapsuleComponent->SetCollisionProfileName("Pawn");
+	
 	OnRespawnEvent.Broadcast();
 
 	if (GetWorld())

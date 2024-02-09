@@ -31,21 +31,18 @@ void AMultiplayerTestGameModeBase::PostLogin(APlayerController* NewPlayer)
 	M_Players.Add(NewPlayer);
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
 		FString::Printf(TEXT("Player Joined: %s"), *M_Players.Last()->GetName()));
-
-	// if (AGameplayPlayerController* GPC = Cast<AGameplayPlayerController>(NewPlayer))
-	// {
-	// 	RespawnPlayer(GPC);
-	// }
+	
+	RespawnPlayer(NewPlayer);
 }
 
 void AMultiplayerTestGameModeBase::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
 
-	// if (APlayerController* PC = Cast<APlayerController>(Exiting))
-	// {
-	// 	M_Players.Remove(PC);
-	// }
+	if (APlayerController* PC = Cast<APlayerController>(Exiting))
+	{
+		M_Players.Remove(PC);
+	}
 }
 
 void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
@@ -73,10 +70,9 @@ void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
 					APawn* SpawnedPawn = World->SpawnActor<APawn>(BP_PlayerActor,
 						SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
 					PlayerToRespawn->Possess(SpawnedPawn);
-					
 					GPC->M_PossessedPawn = Cast<AGameplayActor>(GPC->GetPawn());
-					PlayerToRespawn->Possess(GPC->M_PossessedPawn);
-					
+
+					OnPawnCreatedEvent.Broadcast(PlayerToRespawn, SpawnedPawn);
 					// GPC->M_PossessedPawn = SpawnedActor;
 				}
 			}

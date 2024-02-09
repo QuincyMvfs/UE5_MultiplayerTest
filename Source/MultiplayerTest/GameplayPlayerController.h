@@ -84,7 +84,7 @@ public:
 public:
 	FVector2d M_MovementVector;
 	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	AGameplayActor* M_PossessedPawn;
 	
 	UTheBossGameInstance* M_GameInstanceRef;
