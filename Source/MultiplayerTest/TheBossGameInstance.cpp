@@ -132,7 +132,7 @@ void UTheBossGameInstance::CreateServer(FCreateServerInfo InputServerInfo)
 	SessionSettings.NumPublicConnections = InputServerInfo.MaxPlayers;
 	SessionSettings.NumPrivateConnections  = InputServerInfo.MaxPlayers;
 
-	SessionSettings.Set(FName("SERVER_NAME_KEY"), InputServerInfo.ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	SessionSettings.Set(M_SessionName, InputServerInfo.ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	// SessionSettings.Set(FName("SERVER_HOSTNAME_KEY"), HostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	
 	SessionInterface->CreateSession(0, M_SessionName, SessionSettings);
@@ -144,8 +144,8 @@ void UTheBossGameInstance::FindServers()
 {
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	SessionSearch->MaxSearchResults = 10000;
-	SessionSearch->QuerySettings.Set("SEARCH_PRESENCE", true, EOnlineComparisonOp::Equals);
+	SessionSearch->MaxSearchResults = 500000;
+	SessionSearch->QuerySettings.Set(M_SessionName, true, EOnlineComparisonOp::Equals);
 
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 	OnServerSearchingEvent.Broadcast(true);
