@@ -52,10 +52,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float M_HitDuration = 0.2f;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsHit = false;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsDead = false;
 	
 protected:

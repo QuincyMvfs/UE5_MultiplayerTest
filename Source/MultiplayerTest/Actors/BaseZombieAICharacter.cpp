@@ -22,9 +22,15 @@ ABaseZombieAICharacter::ABaseZombieAICharacter()
 // Called when the game starts or when spawned
 void ABaseZombieAICharacter::BeginPlay() { Super::BeginPlay(); }
 
+void ABaseZombieAICharacter::GetAIAnimationVariables(bool& bIsHit, bool& bIsDead)
+{
+	bIsHit = M_HealthComponent->M_IsHit;
+	bIsDead = M_HealthComponent->M_IsDead;
+}
+
 void ABaseZombieAICharacter::AIAttack()
 {
-	if (!HasAuthority()){ Server_AIAttack(); }
+	if (!HasAuthority() && IsLocallyControlled()) { Server_AIAttack(); }
 	else { Multi_AIAttack(); }
 }
 

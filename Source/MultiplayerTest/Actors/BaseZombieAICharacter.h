@@ -42,6 +42,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual void GetAIAnimationVariables(bool& bIsHit, bool& bIsDead);
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void AIAttack();
 
@@ -56,5 +59,8 @@ public:
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float M_Damage = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float M_AttackSpeed = 1.5f;
 	
 };
