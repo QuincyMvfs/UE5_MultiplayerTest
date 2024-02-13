@@ -54,9 +54,10 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 		PerformRaycast(m_startPoint, m_endPoint, shooter);
 
 		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
-		
-		if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
-		else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+
+		Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+		// if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+		// else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
 	}
 }
 

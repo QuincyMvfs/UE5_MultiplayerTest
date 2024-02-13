@@ -77,6 +77,12 @@ void UHealthComponent::SetIsHit()
 
 void UHealthComponent::SetIsNotHit()
 {
+	if (GetOwner()->HasAuthority()) { Multi_SetIsNotHit(); }
+}
+
+void UHealthComponent::Multi_SetIsNotHit_Implementation()
+{
 	M_IsHit = false;
+	OnStunCompletedEvent.Broadcast();
 }
 

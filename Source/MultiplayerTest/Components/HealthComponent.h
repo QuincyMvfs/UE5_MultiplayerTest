@@ -7,6 +7,7 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamaged, float, HealthPercent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStunComplete);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, Killer);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -28,6 +29,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FOnDamaged OnDamagedEvent;
 	UPROPERTY(BlueprintAssignable)
+		FOnStunComplete OnStunCompletedEvent;
+	UPROPERTY(BlueprintAssignable)
 		FOnKilled OnKilledEvent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -45,6 +48,10 @@ public:
 	
 	void SetIsHit();
 	void SetIsNotHit();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_SetIsNotHit();
+	void Multi_SetIsNotHit_Implementation();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float M_MaxHealth = 100.0f;
