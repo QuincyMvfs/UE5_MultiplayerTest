@@ -26,6 +26,7 @@ void ABaseZombieAICharacter::GetAIAnimationVariables(bool& bIsHit, bool& bIsDead
 {
 	bIsHit = M_HealthComponent->M_IsHit;
 	bIsDead = M_HealthComponent->M_IsDead;
+
 }
 
 void ABaseZombieAICharacter::AIAttack()
