@@ -55,9 +55,10 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 
 		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
 
-		Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-		// if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
-		// else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+		if (APawn* PawnOwner = Cast<APawn>(GetOwner()))
+		{
+			if (!PawnOwner->IsLocallyControlled()) { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+		}
 	}
 }
 
