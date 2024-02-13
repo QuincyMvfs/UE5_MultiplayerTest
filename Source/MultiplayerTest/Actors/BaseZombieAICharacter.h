@@ -44,6 +44,14 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void AIAttack();
+
+	UFUNCTION(Server, Reliable)
+	virtual void Server_AIAttack();
+	virtual void Server_AIAttack_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multi_AIAttack();
+	virtual void Multi_AIAttack_Implementation();
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

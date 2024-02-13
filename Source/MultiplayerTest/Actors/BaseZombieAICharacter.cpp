@@ -24,6 +24,17 @@ void ABaseZombieAICharacter::BeginPlay() { Super::BeginPlay(); }
 
 void ABaseZombieAICharacter::AIAttack()
 {
+	if (!HasAuthority()){ Server_AIAttack(); }
+	else { Multi_AIAttack(); }
+}
+
+void ABaseZombieAICharacter::Server_AIAttack_Implementation()
+{
+	Multi_AIAttack();
+}
+
+void ABaseZombieAICharacter::Multi_AIAttack_Implementation()
+{
 	TArray<AActor*> OverlappingActors;
 	M_AttackSphereCollider->GetOverlappingActors(OverlappingActors);
 	for (AActor* Actor : OverlappingActors)
