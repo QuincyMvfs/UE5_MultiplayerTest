@@ -164,7 +164,7 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 
 void UBaseWeaponComponent::DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone)
 {
-	if (!GetOwner()->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
+	if (!Instigator->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
 	else { Multi_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
 }
 
