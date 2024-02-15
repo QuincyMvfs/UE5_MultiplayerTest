@@ -110,7 +110,8 @@ protected:
 		FVector m_hitEndPoint;
 	UPROPERTY(Replicated)
 		FVector m_muzzleLocation;
-	
+
+	APawn* m_pawnOwner;
 	int m_currentMagazine;
 	float m_nextTimeToShoot;
 	float m_rayLength = 100000.0f;

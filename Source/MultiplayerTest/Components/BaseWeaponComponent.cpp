@@ -25,7 +25,7 @@ UBaseWeaponComponent::UBaseWeaponComponent()
 void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	m_pawnOwner = Cast<APawn>(GetOwner());
 }
 
 void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -45,17 +45,15 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 {
 	if (TryShootWeapon())
 	{
+		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
+		m_currentMagazine--;
 		
 		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
 
 		// Check Authority, and check if the shooter is locally controlled to prevent client from shooting
-		if (const APawn* PawnOwner = Cast<APawn>(GetOwner()))
+		if (m_pawnOwner)
 		{
-			if (!GetOwner()->HasAuthority() && PawnOwner->IsLocallyControlled())
-			{
-				Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-			}
-			else
+			if (!GetOwner()->HasAuthority() && m_pawnOwner->IsLocallyControlled())
 			{
 				m_startPoint = cameraComponent->GetComponentLocation();
 				m_forwardVector = cameraComponent->GetForwardVector();
@@ -63,7 +61,18 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 				m_muzzleLocation = muzzleLocation; 
 				m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
 				SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
-
+				
+				Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+			}
+			else if (m_pawnOwner->IsLocallyControlled())
+			{
+				m_startPoint = cameraComponent->GetComponentLocation();
+				m_forwardVector = cameraComponent->GetForwardVector();
+				m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
+				m_muzzleLocation = muzzleLocation; 
+				m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
+				SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
+				
 				Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
 			}
 		}
@@ -92,17 +101,13 @@ bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* camer
 void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent,
 	AActor* shooter, FVector muzzleLocation)
 {
-	if (TryShootWeapon())
-	{
-		m_startPoint = cameraComponent->GetComponentLocation();
-		m_forwardVector = cameraComponent->GetForwardVector();
-		m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
-		m_muzzleLocation = muzzleLocation; 
-		m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
-		SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
-
-		Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-	}
+	m_startPoint = cameraComponent->GetComponentLocation();
+	m_forwardVector = cameraComponent->GetForwardVector();
+	m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
+	m_muzzleLocation = muzzleLocation; 
+	m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
+	
+	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
 }
 
 // SERVER SHOOT
@@ -110,16 +115,16 @@ bool UBaseWeaponComponent::Multi_OnShootWeapon_Validate(UCameraComponent* camera
 	AActor* shooter, FVector muzzleLocation) { return true; }
 void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
 {
-	if (TryShootWeapon())
+	if (m_pawnOwner)
 	{
-		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
-		m_currentMagazine--;
-		
-		SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
-	
-		if (M_FireSound)
+		if (!m_pawnOwner->IsLocallyControlled())
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
+			SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
+	
+			if (M_FireSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
+			}
 		}
 	}
 }
@@ -172,8 +177,7 @@ FVector UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoin
 		{
 			if (UHealthComponent* hitHealth = hitActor->FindComponentByClass<UHealthComponent>())
 			{
-				APawn* PawnOwner = Cast<APawn>(GetOwner());
-				if (PawnOwner->IsLocallyControlled())
+				if (m_pawnOwner->IsLocallyControlled())
 				{
 					DealDamage(M_Damage, shooter, hitActor, hitHealth, hitResult.BoneName);
 				}
