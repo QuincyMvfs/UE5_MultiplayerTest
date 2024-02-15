@@ -96,18 +96,20 @@ public:
 	UNiagaraSystem* M_BulletTracer;
 
 protected:
-	virtual void PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
+	virtual FVector PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
 	virtual void SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation);
 	
 protected:
 	UPROPERTY(Replicated)
-	FVector m_startPoint;
+		FVector m_startPoint;
 	UPROPERTY(Replicated)
-	FVector m_forwardVector;
+		FVector m_forwardVector;
 	UPROPERTY(Replicated)
-	FVector m_endPoint;
+		FVector m_rayEndPoint;
 	UPROPERTY(Replicated)
-	FVector m_muzzleLocation;
+		FVector m_hitEndPoint;
+	UPROPERTY(Replicated)
+		FVector m_muzzleLocation;
 	
 	int m_currentMagazine;
 	float m_nextTimeToShoot;
