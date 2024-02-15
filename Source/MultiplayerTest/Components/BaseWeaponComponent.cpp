@@ -101,12 +101,14 @@ bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* camer
 void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent,
 	AActor* shooter, FVector muzzleLocation)
 {
+	// Check if the hit registered on the server
 	m_startPoint = cameraComponent->GetComponentLocation();
 	m_forwardVector = cameraComponent->GetForwardVector();
 	m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
 	m_muzzleLocation = muzzleLocation; 
 	m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
-	
+
+	// Spawn tracers and play sound on all other clients
 	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
 }
 
