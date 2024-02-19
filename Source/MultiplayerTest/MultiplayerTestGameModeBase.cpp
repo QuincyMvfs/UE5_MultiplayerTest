@@ -27,7 +27,7 @@ void AMultiplayerTestGameModeBase::PlayerHit()
 void AMultiplayerTestGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-
+	
 	if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
 	{
 		GS->PlayerJoined(NewPlayer);

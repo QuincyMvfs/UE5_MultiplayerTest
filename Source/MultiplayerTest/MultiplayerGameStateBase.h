@@ -26,6 +26,15 @@ public:
 	void PlayerCreated(APlayerController* Controller, AActor* Actor);
 	
 	void PlayerJoined(APlayerController* NewPlayer);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_PlayerJoined(APlayerController* NewPlayer);
+	void Server_PlayerJoined_Implementation(APlayerController* NewPlayer);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multi_PlayerJoined(APlayerController* NewPlayer);
+	void Multi_PlayerJoined_Implementation(APlayerController* NewPlayer);
+
 	void PlayerLeft(APlayerController* NewPlayer);
 
 	UPROPERTY(Replicated)

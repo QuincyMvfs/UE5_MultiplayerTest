@@ -34,7 +34,7 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere)
 	TArray<APlayerStart*> PlayerStarts;
-
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AActor> BP_PlayerActor;
 };
