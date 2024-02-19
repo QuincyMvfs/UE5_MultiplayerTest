@@ -55,6 +55,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multi_AIAttack();
 	virtual void Multi_AIAttack_Implementation();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void Dead(AActor* Killer);
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
