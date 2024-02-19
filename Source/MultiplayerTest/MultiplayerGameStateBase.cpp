@@ -15,6 +15,7 @@ void AMultiplayerGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMultiplayerGameStateBase, TotalHits);
+	DOREPLIFETIME(AMultiplayerGameStateBase, JoinedPlayers);
 }
 
 void AMultiplayerGameStateBase::PlayerHit()
@@ -24,4 +25,19 @@ void AMultiplayerGameStateBase::PlayerHit()
 		TotalHits++;
 		UE_LOG(LogTemp, Warning, TEXT("HITS: %d"), TotalHits);
 	}
+}
+
+void AMultiplayerGameStateBase::PlayerCreated(APlayerController* Controller, AActor* Actor)
+{
+	OnPlayerCreatedEvent.Broadcast(Controller, Actor);
+}
+
+void AMultiplayerGameStateBase::PlayerJoined(APlayerController* NewPlayer)
+{
+	JoinedPlayers.Add(NewPlayer);
+}
+
+void AMultiplayerGameStateBase::PlayerLeft(APlayerController* NewPlayer)
+{
+	JoinedPlayers.Remove(NewPlayer);
 }

@@ -32,9 +32,6 @@ public:
 	virtual void RespawnPlayer(AController* PlayerToRespawn);
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<APlayerController*> M_Players;
-	
 	UPROPERTY(VisibleAnywhere)
 	TArray<APlayerStart*> PlayerStarts;
 

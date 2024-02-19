@@ -54,9 +54,7 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UHealthComponent* M_PlayerHealthComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
-	UWidgetComponent* M_HealthBar;
+	
 	//*
 	
 public:

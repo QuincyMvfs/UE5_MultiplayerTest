@@ -50,10 +50,6 @@ AGameplayActor::AGameplayActor()
 	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
 	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	M_PlayerHealthComponent->OnKilledEvent.AddDynamic(this, &AGameplayActor::SetDead);
-
-	// UI
-	M_HealthBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
-	M_HealthBar->SetupAttachment(M_PlayerModelSKC, "HeadTop_End");
 }
 //*
 

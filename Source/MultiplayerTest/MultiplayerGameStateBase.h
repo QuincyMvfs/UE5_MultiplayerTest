@@ -6,9 +6,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "MultiplayerGameStateBase.generated.h"
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerCreated, APlayerController*, Controller, AActor*, SpawnedActor);
+
 UCLASS()
 class MULTIPLAYERTEST_API AMultiplayerGameStateBase : public AGameStateBase
 {
@@ -18,9 +17,20 @@ public:
 	AMultiplayerGameStateBase();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerCreated OnPlayerCreatedEvent;
 	
 	void PlayerHit();
 
+	void PlayerCreated(APlayerController* Controller, AActor* Actor);
+	
+	void PlayerJoined(APlayerController* NewPlayer);
+	void PlayerLeft(APlayerController* NewPlayer);
+
 	UPROPERTY(Replicated)
 	uint16 TotalHits;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	TArray<APlayerController*> JoinedPlayers;
 };
