@@ -33,14 +33,12 @@ public:
 	virtual bool TryShootWeapon();
 	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void Server_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
-	bool Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	void Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	UFUNCTION(NetMulticast, Reliable)
 	void Multi_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
-	bool Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	void Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	// END OF SHOOTING FUNCTIONS
 	
@@ -96,19 +94,22 @@ public:
 	UNiagaraSystem* M_BulletTracer;
 
 protected:
-	virtual void PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
+	virtual FVector PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
 	virtual void SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation);
 	
 protected:
 	UPROPERTY(Replicated)
-	FVector m_startPoint;
+		FVector m_startPoint;
 	UPROPERTY(Replicated)
-	FVector m_forwardVector;
+		FVector m_forwardVector;
 	UPROPERTY(Replicated)
-	FVector m_endPoint;
+		FVector m_rayEndPoint;
 	UPROPERTY(Replicated)
-	FVector m_muzzleLocation;
-	
+		FVector m_hitEndPoint;
+	UPROPERTY(Replicated)
+		FVector m_muzzleLocation;
+
+	APawn* m_pawnOwner;
 	int m_currentMagazine;
 	float m_nextTimeToShoot;
 	float m_rayLength = 100000.0f;

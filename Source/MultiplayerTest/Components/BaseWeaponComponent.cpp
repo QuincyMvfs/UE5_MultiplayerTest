@@ -25,7 +25,7 @@ UBaseWeaponComponent::UBaseWeaponComponent()
 void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	m_pawnOwner = Cast<APawn>(GetOwner());
 }
 
 void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -34,7 +34,8 @@ void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(UBaseWeaponComponent, M_IsReloading);
 	DOREPLIFETIME(UBaseWeaponComponent, m_startPoint);
-	DOREPLIFETIME(UBaseWeaponComponent, m_endPoint);
+	DOREPLIFETIME(UBaseWeaponComponent, m_rayEndPoint);
+	DOREPLIFETIME(UBaseWeaponComponent, m_hitEndPoint);
 	DOREPLIFETIME(UBaseWeaponComponent, m_forwardVector);
 	DOREPLIFETIME(UBaseWeaponComponent, m_muzzleLocation);
 }
@@ -47,16 +48,14 @@ void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor
 		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
 		m_currentMagazine--;
 
-		m_startPoint = cameraComponent->GetComponentLocation();
-		m_forwardVector = cameraComponent->GetForwardVector();
-		m_endPoint = m_startPoint + (m_forwardVector * m_rayLength);
-		m_muzzleLocation = muzzleLocation;
-		PerformRaycast(m_startPoint, m_endPoint, shooter);
-
-		if (M_FireSound) { UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation); }
+		// m_startPoint = cameraComponent->GetComponentLocation();
+		// m_forwardVector = cameraComponent->GetForwardVector();
+		// m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
+		// m_muzzleLocation = muzzleLocation; 
+		// m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
 		
-		if (!shooter->HasAuthority()) { Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
-		else { Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation); }
+		// Check Authority, and check if the shooter is locally controlled to prevent client from shooting
+		Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
 	}
 }
 
@@ -68,36 +67,40 @@ bool UBaseWeaponComponent::TryShootWeapon()
 	if (m_nextTimeToShoot <= GetWorld()->GetTimeSeconds()
 		&& m_currentMagazine > 0 && !M_IsReloading)
 	{
-		return true;
+		return true; 
 	}
 
 	if (m_currentMagazine <= 0) TryReload();
+	
 	return false;
 }
 
 // CLIENT SHOOT
-bool UBaseWeaponComponent::Server_OnShootWeapon_Validate(UCameraComponent* cameraComponent, AActor* shooter,
-	FVector muzzleLocation) { return true; }
 void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent,
 	AActor* shooter, FVector muzzleLocation)
 {
+	// Check if the hit registered on the server
+	m_startPoint = cameraComponent->GetComponentLocation();
+	m_forwardVector = cameraComponent->GetForwardVector();
+	m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
+	m_muzzleLocation = muzzleLocation; 
+	m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
+
+	// Spawn tracers and play sound on all other clients
 	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
 }
 
 // SERVER SHOOT
-bool UBaseWeaponComponent::Multi_OnShootWeapon_Validate(UCameraComponent* cameraComponent,
-	AActor* shooter, FVector muzzleLocation) { return true; }
 void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
 {
-	APawn* PawnOwner = Cast<APawn>(shooter);
-	if (!PawnOwner->IsLocallyControlled())
+	if (IsValid(m_pawnOwner))
 	{
-		PerformRaycast(m_startPoint, m_endPoint, shooter);
-		
+		SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
+	
 		if (M_FireSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, M_FireSound, muzzleLocation);
-		}
+		}	
 	}
 }
 
@@ -137,7 +140,7 @@ void UBaseWeaponComponent::Reload()
 }
 
 
-void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter)
+FVector UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter)
 {
 	FHitResult hitResult;
 	if (bool hitObject = UKismetSystemLibrary::LineTraceSingle(
@@ -149,22 +152,29 @@ void UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, 
 		{
 			if (UHealthComponent* hitHealth = hitActor->FindComponentByClass<UHealthComponent>())
 			{
-				APawn* PawnOwner = Cast<APawn>(GetOwner());
-				if (PawnOwner->IsLocallyControlled())
-				{
-					DealDamage(M_Damage, shooter, hitActor, hitHealth, hitResult.BoneName);
-				}
+				DealDamage(M_Damage, shooter, hitActor, hitHealth, hitResult.BoneName);
 			}
 		}
 		
-		SpawnBulletTracer(m_muzzleLocation, hitResult.Location, m_forwardVector.Rotation());
+		return hitResult.Location;
 	}
-	else { SpawnBulletTracer(m_muzzleLocation, endPoint, m_forwardVector.Rotation()); }
+
+	return endPoint;
+}
+
+void UBaseWeaponComponent::SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation)
+{
+	if (M_BulletTracer)
+	{
+		UNiagaraComponent* SpawnedTracer = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), M_BulletTracer,
+			startPoint, rotation, FVector::One(), true);
+		SpawnedTracer->SetVectorParameter("BeamEnd", endPoint);
+	}
 }
 
 void UBaseWeaponComponent::DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone)
 {
-	if (!GetOwner()->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
+	if (!Instigator->HasAuthority()) { Server_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
 	else { Multi_DealDamage(Amount, Instigator, Victim, HitHealth, HitBone); }
 }
 
@@ -182,28 +192,5 @@ void UBaseWeaponComponent::Multi_DealDamage_Implementation(float Amount, AActor*
 	UHealthComponent* HitHealth, FName HitBone)
 {
 	HitHealth->TakeDamage(Amount, Instigator, Victim, HitBone);
-	
-	// if (AMultiplayerTestGameModeBase* GM = GetWorld()->GetAuthGameMode<AMultiplayerTestGameModeBase>())
-	// {
-	// 	GM->PlayerHit();
-	// }
-	//
-	// if (AGameplayActor* InstigatorPlayer = Cast<AGameplayActor>(GetOwner()))
-	// {
-	// 	if (AGameplayPlayerState* PS = InstigatorPlayer->GetPlayerState<AGameplayPlayerState>())
-	// 	{
-	// 		PS->PlayerHit();
-	// 	}
-	// }
-}
-
-void UBaseWeaponComponent::SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation)
-{
-	if (M_BulletTracer)
-	{
-		UNiagaraComponent* SpawnedTracer = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), M_BulletTracer,
-			startPoint, rotation, FVector::One(), true);
-		SpawnedTracer->SetVectorParameter("BeamEnd", endPoint);
-	}
 }
 

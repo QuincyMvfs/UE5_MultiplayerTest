@@ -232,8 +232,11 @@ void AGameplayActor::Multi_SetShooting_Implementation(bool Value)
 	{
 		if (!M_WeaponComponent->M_IsReloading)
 		{
-			M_WeaponComponent->ShootWeapon(M_PlayerCamera, this,
-				M_MuzzleLocationComponent->GetComponentLocation());
+			if (IsLocallyControlled())
+			{
+				M_WeaponComponent->ShootWeapon(M_PlayerCamera, this,
+					M_MuzzleLocationComponent->GetComponentLocation());
+			}
 		}
 		else { m_isShooting = false; }
 		
