@@ -55,6 +55,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
 	virtual void SetupInputComponent() override;
 	
 	UFUNCTION(BlueprintCallable)
@@ -88,4 +89,9 @@ public:
 	AGameplayActor* M_PossessedPawn;
 	
 	UTheBossGameInstance* M_GameInstanceRef;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool M_InputSet = false;
+	
 };
+

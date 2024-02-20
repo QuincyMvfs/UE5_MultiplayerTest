@@ -3,6 +3,7 @@
 
 #include "MultiplayerGameStateBase.h"
 
+#include "GameplayPlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 AMultiplayerGameStateBase::AMultiplayerGameStateBase()
@@ -20,24 +21,35 @@ void AMultiplayerGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 void AMultiplayerGameStateBase::PlayerHit()
 {
-	if (HasAuthority())
+	if (HasAuthority()) { TotalHits++; }
+}
+
+void AMultiplayerGameStateBase::PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor)
+{
+	PlayerState->M_PlayerPawn = CreatedActor;
+	OnPlayerCreatedEvent.Broadcast(PlayerState);
+}
+
+void AMultiplayerGameStateBase::PlayerJoined(AGameplayPlayerState* PlayerState)
+{
+	if (HasAuthority()) { Multi_PlayerJoined(PlayerState); }
+	else { Server_PlayerJoined(PlayerState); }
+}
+
+void AMultiplayerGameStateBase::Server_PlayerJoined_Implementation(AGameplayPlayerState* PlayerState)
+{
+	Multi_PlayerJoined(PlayerState);
+}
+
+void AMultiplayerGameStateBase::Multi_PlayerJoined_Implementation(AGameplayPlayerState* PlayerState)
+{
+	if (!JoinedPlayers.Contains(PlayerState))
 	{
-		TotalHits++;
-		UE_LOG(LogTemp, Warning, TEXT("HITS: %d"), TotalHits);
+		JoinedPlayers.Add(PlayerState);
 	}
 }
 
-void AMultiplayerGameStateBase::PlayerCreated(APlayerController* Controller, AActor* Actor)
+void AMultiplayerGameStateBase::PlayerLeft(AGameplayPlayerState* PlayerState)
 {
-	OnPlayerCreatedEvent.Broadcast(Controller, Actor);
-}
-
-void AMultiplayerGameStateBase::PlayerJoined(APlayerController* NewPlayer)
-{
-	if (HasAuthority()) { JoinedPlayers.Add(NewPlayer); }
-}
-
-void AMultiplayerGameStateBase::PlayerLeft(APlayerController* NewPlayer)
-{
-	JoinedPlayers.Remove(NewPlayer);
+	JoinedPlayers.Remove(PlayerState);
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerState.h"
 #include "GameplayPlayerState.generated.h"
 
+class AGameplayActor;
 /**
  * 
  */
@@ -23,5 +24,8 @@ public:
 	
 	UPROPERTY(Replicated)
 	uint16 M_TotalHits;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly)
+	AGameplayActor* M_PlayerPawn;
 
 };

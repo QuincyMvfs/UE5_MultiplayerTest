@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actors/GameplayActor.h"
 #include "GameFramework/GameStateBase.h"
 #include "MultiplayerGameStateBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerCreated, APlayerController*, Controller, AActor*, SpawnedActor);
+class AGameplayPlayerState;
+class AGameplayActor;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerCreated, AGameplayPlayerState*, PlayerState);
 
 UCLASS()
 class MULTIPLAYERTEST_API AMultiplayerGameStateBase : public AGameStateBase
@@ -23,23 +26,23 @@ public:
 	
 	void PlayerHit();
 
-	void PlayerCreated(APlayerController* Controller, AActor* Actor);
+	void PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
 	
-	void PlayerJoined(APlayerController* NewPlayer);
+	void PlayerJoined(AGameplayPlayerState* PlayerState);
 
-	// UFUNCTION(Server, Unreliable)
-	// void Server_PlayerJoined(APlayerController* NewPlayer);
-	// void Server_PlayerJoined_Implementation(APlayerController* NewPlayer);
-	//
-	// UFUNCTION(NetMulticast, Unreliable)
-	// void Multi_PlayerJoined(APlayerController* NewPlayer);
-	// void Multi_PlayerJoined_Implementation(APlayerController* NewPlayer);
+	UFUNCTION(Server, Unreliable)
+	void Server_PlayerJoined(AGameplayPlayerState* PlayerState);
+	void Server_PlayerJoined_Implementation(AGameplayPlayerState* PlayerState);
 
-	void PlayerLeft(APlayerController* NewPlayer);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multi_PlayerJoined(AGameplayPlayerState* PlayerState);
+	void Multi_PlayerJoined_Implementation(AGameplayPlayerState* PlayerState);
+
+	void PlayerLeft(AGameplayPlayerState* PlayerState);
 
 	UPROPERTY(Replicated)
 	uint16 TotalHits;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
-	TArray<APlayerController*> JoinedPlayers;
+	TArray<AGameplayPlayerState*> JoinedPlayers;
 };
