@@ -34,18 +34,7 @@ void AMultiplayerGameStateBase::PlayerCreated(APlayerController* Controller, AAc
 
 void AMultiplayerGameStateBase::PlayerJoined(APlayerController* NewPlayer)
 {
-	if (HasAuthority()) { Multi_PlayerJoined(NewPlayer); }
-	else { Server_PlayerJoined(NewPlayer); }
-}
-
-void AMultiplayerGameStateBase::Server_PlayerJoined_Implementation(APlayerController* NewPlayer)
-{
-	Multi_PlayerJoined_Implementation(NewPlayer);
-}
-
-void AMultiplayerGameStateBase::Multi_PlayerJoined_Implementation(APlayerController* NewPlayer)
-{
-	JoinedPlayers.Add(NewPlayer);
+	if (HasAuthority()) { JoinedPlayers.Add(NewPlayer); }
 }
 
 void AMultiplayerGameStateBase::PlayerLeft(APlayerController* NewPlayer)

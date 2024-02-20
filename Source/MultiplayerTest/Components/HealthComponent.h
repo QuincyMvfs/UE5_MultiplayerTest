@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamaged, float, HealthPercent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float, HealthPercent, AActor*, Damaged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStunComplete);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, Killer);
 
