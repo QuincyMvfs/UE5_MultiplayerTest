@@ -4,6 +4,7 @@
 #include "MultiplayerTestGameModeBase.h"
 
 #include "GameplayPlayerController.h"
+#include "GameplayPlayerState.h"
 #include "MultiplayerGameStateBase.h"
 #include "Actors/GameplayActor.h"
 #include "GameFramework/PlayerStart.h"
@@ -30,7 +31,7 @@ void AMultiplayerTestGameModeBase::PostLogin(APlayerController* NewPlayer)
 	
 	if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
 	{
-		GS->PlayerJoined(NewPlayer);
+		GS->PlayerJoined(NewPlayer->GetPlayerState<AGameplayPlayerState>());
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
 			FString::Printf(TEXT("Player Joined: %s"), *GS->JoinedPlayers.Last()->GetName()));
 	}
@@ -46,7 +47,7 @@ void AMultiplayerTestGameModeBase::Logout(AController* Exiting)
 	{
 		if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
 		{
-			GS->PlayerLeft(PC);
+			GS->PlayerLeft(PC->GetPlayerState<AGameplayPlayerState>());
 		}
 	}
 }
@@ -77,15 +78,13 @@ void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
 						SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
 					PlayerToRespawn->Possess(SpawnedPawn);
 					GPC->M_PossessedPawn = Cast<AGameplayActor>(GPC->GetPawn());
-
 					OnPawnCreatedEvent.Broadcast(PlayerToRespawn, SpawnedPawn);
-					// GPC->M_PossessedPawn = SpawnedActor;
 
 					if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
 					{
 						if (APlayerController* PC = Cast<APlayerController>(PlayerToRespawn))
 						{
-							GS->PlayerCreated(PC, SpawnedPawn);
+							GS->PlayerCreated(PC->GetPlayerState<AGameplayPlayerState>(), GPC->M_PossessedPawn);
 						}
 					}
 				}
@@ -93,6 +92,30 @@ void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
 		}
 	}
 }
+
+// FLinearColor AMultiplayerTestGameModeBase::SelectColor()
+// {
+// 	if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
+// 	{
+// 		
+// 		if (HasAuthority())
+// 		{
+// 			const int RandInt = FMath::RandRange(0, GS->AvailableColors.Num() - 1);
+// 			UE_LOG(LogTemp, Warning, TEXT("Rand Range: %d"), RandInt)
+// 			UE_LOG(LogTemp, Warning, TEXT("Array Length: %d"), GS->AvailableColors.Num() - 1);
+// 			const FLinearColor SelectedColor = GS->AvailableColors[RandInt];
+// 			GS->AvailableColors.RemoveAt(RandInt);
+// 			// RemoveColor(RandInt);
+// 		
+// 			return SelectedColor;
+// 		}
+//
+// 		return GS->AvailableColors[0];
+// 	}
+//
+// 	constexpr FLinearColor Black(0.0f, 0.0f, 0.0f);
+// 	return Black;
+// }
 
 //* PLAYER START STUFF
 void AMultiplayerTestGameModeBase::FindPlayerStarts()

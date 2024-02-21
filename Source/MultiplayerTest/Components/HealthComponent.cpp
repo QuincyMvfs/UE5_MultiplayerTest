@@ -52,7 +52,7 @@ void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Ins
 
 	if (m_currentHealth <= 0)
 	{
-		OnKilledEvent.Broadcast(Instigator);
+		OnKilledEvent.Broadcast(Victim);
 		M_IsDead = true;
 	}
 }

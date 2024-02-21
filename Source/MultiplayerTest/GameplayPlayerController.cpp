@@ -43,6 +43,8 @@ void AGameplayPlayerController::SetupInputComponent()
 	{
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 		{
+			M_InputSet = true;
+			
 			// Movement
 			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Move);
 			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Look);
@@ -91,8 +93,6 @@ void AGameplayPlayerController::Jump(const FInputActionValue& Value)
 
 void AGameplayPlayerController::Look(const FInputActionValue& Value)
 {
-	
-	
 	const FVector2d LookAxisVector = Value.Get<FVector2d>();
 
 	if (M_PossessedPawn && M_PossessedPawn->M_CurrentState != EMovementStates::Dead)
