@@ -27,5 +27,8 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly)
 	AGameplayActor* M_PlayerPawn;
+	
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	FLinearColor M_PlayerColor;
 
 };

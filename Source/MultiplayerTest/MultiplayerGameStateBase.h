@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actors/GameplayActor.h"
 #include "GameFramework/GameStateBase.h"
+#include "Util/ColorConstants.h"
 #include "MultiplayerGameStateBase.generated.h"
 
 class AGameplayPlayerState;
@@ -40,9 +41,26 @@ public:
 
 	void PlayerLeft(AGameplayPlayerState* PlayerState);
 
+	// UFUNCTION(BlueprintCallable, BlueprintPure)
+	// FLinearColor SelectColor();
+	//
+	// UFUNCTION()
+	// void RemoveColor(int Index);
+	//
+	// UFUNCTION(Server, Unreliable)
+	// void Server_RemoveColor(int Index);
+	// void Server_RemoveColor_Implementation(int Index);
+	
+public:
 	UPROPERTY(Replicated)
 	uint16 TotalHits;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	TArray<AGameplayPlayerState*> JoinedPlayers;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<FLinearColor> AvailableColors;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<FLinearColor> BaseColors;
 };

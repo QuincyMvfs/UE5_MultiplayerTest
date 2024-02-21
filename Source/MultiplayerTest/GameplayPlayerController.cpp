@@ -93,8 +93,6 @@ void AGameplayPlayerController::Jump(const FInputActionValue& Value)
 
 void AGameplayPlayerController::Look(const FInputActionValue& Value)
 {
-	
-	
 	const FVector2d LookAxisVector = Value.Get<FVector2d>();
 
 	if (M_PossessedPawn && M_PossessedPawn->M_CurrentState != EMovementStates::Dead)

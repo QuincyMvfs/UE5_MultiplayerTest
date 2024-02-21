@@ -4,11 +4,26 @@
 #include "MultiplayerGameStateBase.h"
 
 #include "GameplayPlayerState.h"
+#include "IndexTypes.h"
 #include "Net/UnrealNetwork.h"
 
 AMultiplayerGameStateBase::AMultiplayerGameStateBase()
 {
 	TotalHits = 0;
+	
+	const FLinearColor RedColor(1.0f, 0.0f, 0.0f);
+	const FLinearColor BlueColor(0.0f, 0.0f, 1.0f);
+	const FLinearColor YellowColor(1.0f, 1.0f, 0.0f);
+	const FLinearColor GreenColor(0.0f, 1.0f, 0.0f);
+	const FLinearColor PurpleColor(0.0f, 1.0f, 1.0f);
+
+	BaseColors.Add(RedColor);
+	BaseColors.Add(BlueColor);
+	BaseColors.Add(YellowColor);
+	BaseColors.Add(GreenColor);
+	BaseColors.Add(PurpleColor);
+	
+	AvailableColors = BaseColors;
 }
 
 void AMultiplayerGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -17,6 +32,8 @@ void AMultiplayerGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 	DOREPLIFETIME(AMultiplayerGameStateBase, TotalHits);
 	DOREPLIFETIME(AMultiplayerGameStateBase, JoinedPlayers);
+	DOREPLIFETIME(AMultiplayerGameStateBase, AvailableColors);
+	DOREPLIFETIME(AMultiplayerGameStateBase, BaseColors);
 }
 
 void AMultiplayerGameStateBase::PlayerHit()
@@ -53,3 +70,31 @@ void AMultiplayerGameStateBase::PlayerLeft(AGameplayPlayerState* PlayerState)
 {
 	JoinedPlayers.Remove(PlayerState);
 }
+
+// FLinearColor AMultiplayerGameStateBase::SelectColor()
+// {
+// 	if (HasAuthority())
+// 	{
+// 		const int RandInt = FMath::RandRange(0, AvailableColors.Num() - 1);
+// 		UE_LOG(LogTemp, Warning, TEXT("Rand Range: %d"), RandInt)
+// 		UE_LOG(LogTemp, Warning, TEXT("Array Length: %d"), AvailableColors.Num() - 1);
+// 		const FLinearColor SelectedColor = AvailableColors[RandInt];
+// 		AvailableColors.RemoveAt(RandInt);
+// 		// RemoveColor(RandInt);
+// 		
+// 		return SelectedColor;
+// 	}
+//
+// 	return AvailableColors[0];
+// }
+//
+// void AMultiplayerGameStateBase::RemoveColor(int Index)
+// {
+// 	if (HasAuthority()) { Server_RemoveColor(Index); }
+// }
+//
+// void AMultiplayerGameStateBase::Server_RemoveColor_Implementation(int Index)
+// {
+// 	AvailableColors.RemoveAt(Index);
+// }
+
