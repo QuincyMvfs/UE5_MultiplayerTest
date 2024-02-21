@@ -31,4 +31,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FLinearColor M_PlayerColor;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	FName M_PlayerName;
+
 };

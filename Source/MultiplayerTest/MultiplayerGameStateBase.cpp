@@ -11,11 +11,17 @@ AMultiplayerGameStateBase::AMultiplayerGameStateBase()
 {
 	TotalHits = 0;
 	
-	const FLinearColor RedColor(1.0f, 0.0f, 0.0f);
-	const FLinearColor BlueColor(0.0f, 0.0f, 1.0f);
-	const FLinearColor YellowColor(1.0f, 1.0f, 0.0f);
-	const FLinearColor GreenColor(0.0f, 1.0f, 0.0f);
-	const FLinearColor PurpleColor(0.0f, 1.0f, 1.0f);
+	ConstructColours();
+	ConstructNames();
+}
+
+void AMultiplayerGameStateBase::ConstructColours()
+{
+	constexpr FLinearColor RedColor(1.0f, 0.0f, 0.0f);
+	constexpr FLinearColor BlueColor(0.0f, 0.0f, 1.0f);
+	constexpr FLinearColor YellowColor(1.0f, 1.0f, 0.0f);
+	constexpr FLinearColor GreenColor(0.0f, 1.0f, 0.0f);
+	constexpr FLinearColor PurpleColor(0.0f, 1.0f, 1.0f);
 
 	BaseColors.Add(RedColor);
 	BaseColors.Add(BlueColor);
@@ -24,6 +30,18 @@ AMultiplayerGameStateBase::AMultiplayerGameStateBase()
 	BaseColors.Add(PurpleColor);
 	
 	AvailableColors = BaseColors;
+}
+
+void AMultiplayerGameStateBase::ConstructNames()
+{
+	BaseNames.Add(TEXT("Amathophobia"));
+	BaseNames.Add(TEXT("Hocuspocus"));
+	BaseNames.Add(TEXT("GummifyCorbel"));
+	BaseNames.Add(TEXT("ClockworkLingo"));
+	BaseNames.Add(TEXT("Nothingarian"));
+
+	AvailableNames = BaseNames;
+	// https://www.coolgenerator.com/username-generator
 }
 
 void AMultiplayerGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -71,30 +89,21 @@ void AMultiplayerGameStateBase::PlayerLeft(AGameplayPlayerState* PlayerState)
 	JoinedPlayers.Remove(PlayerState);
 }
 
-// FLinearColor AMultiplayerGameStateBase::SelectColor()
-// {
-// 	if (HasAuthority())
-// 	{
-// 		const int RandInt = FMath::RandRange(0, AvailableColors.Num() - 1);
-// 		UE_LOG(LogTemp, Warning, TEXT("Rand Range: %d"), RandInt)
-// 		UE_LOG(LogTemp, Warning, TEXT("Array Length: %d"), AvailableColors.Num() - 1);
-// 		const FLinearColor SelectedColor = AvailableColors[RandInt];
-// 		AvailableColors.RemoveAt(RandInt);
-// 		// RemoveColor(RandInt);
-// 		
-// 		return SelectedColor;
-// 	}
-//
-// 	return AvailableColors[0];
-// }
-//
-// void AMultiplayerGameStateBase::RemoveColor(int Index)
-// {
-// 	if (HasAuthority()) { Server_RemoveColor(Index); }
-// }
-//
-// void AMultiplayerGameStateBase::Server_RemoveColor_Implementation(int Index)
-// {
-// 	AvailableColors.RemoveAt(Index);
-// }
+FLinearColor AMultiplayerGameStateBase::SelectColor()
+{
+	const int RandInt = FMath::RandRange(0, AvailableColors.Num() - 1);
+	const FLinearColor SelectedColor = AvailableColors[RandInt];
+	AvailableColors.RemoveAt(RandInt);
+	
+	return SelectedColor;
+}
+
+FName AMultiplayerGameStateBase::GetRandomName()
+{
+	const int RandInt = FMath::RandRange(0, AvailableNames.Num() - 1);
+	const FName SelectedName = AvailableNames[RandInt];
+	AvailableNames.RemoveAt(RandInt);
+
+	return SelectedName;
+}
 

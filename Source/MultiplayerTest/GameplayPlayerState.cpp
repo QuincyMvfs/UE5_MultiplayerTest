@@ -17,6 +17,7 @@ void AGameplayPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(AGameplayPlayerState, M_TotalHits);
 	DOREPLIFETIME(AGameplayPlayerState, M_PlayerPawn);
 	DOREPLIFETIME(AGameplayPlayerState, M_PlayerColor);
+	DOREPLIFETIME(AGameplayPlayerState, M_PlayerName);
 }
 
 void AGameplayPlayerState::PlayerHit()

@@ -93,29 +93,29 @@ void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
 	}
 }
 
-FLinearColor AMultiplayerTestGameModeBase::SelectColor()
-{
-	if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
-	{
-		
-		if (HasAuthority())
-		{
-			const int RandInt = FMath::RandRange(0, GS->AvailableColors.Num() - 1);
-			UE_LOG(LogTemp, Warning, TEXT("Rand Range: %d"), RandInt)
-			UE_LOG(LogTemp, Warning, TEXT("Array Length: %d"), GS->AvailableColors.Num() - 1);
-			const FLinearColor SelectedColor = GS->AvailableColors[RandInt];
-			GS->AvailableColors.RemoveAt(RandInt);
-			// RemoveColor(RandInt);
-		
-			return SelectedColor;
-		}
-
-		return GS->AvailableColors[0];
-	}
-
-	constexpr FLinearColor Black(0.0f, 0.0f, 0.0f);
-	return Black;
-}
+// FLinearColor AMultiplayerTestGameModeBase::SelectColor()
+// {
+// 	if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
+// 	{
+// 		
+// 		if (HasAuthority())
+// 		{
+// 			const int RandInt = FMath::RandRange(0, GS->AvailableColors.Num() - 1);
+// 			UE_LOG(LogTemp, Warning, TEXT("Rand Range: %d"), RandInt)
+// 			UE_LOG(LogTemp, Warning, TEXT("Array Length: %d"), GS->AvailableColors.Num() - 1);
+// 			const FLinearColor SelectedColor = GS->AvailableColors[RandInt];
+// 			GS->AvailableColors.RemoveAt(RandInt);
+// 			// RemoveColor(RandInt);
+// 		
+// 			return SelectedColor;
+// 		}
+//
+// 		return GS->AvailableColors[0];
+// 	}
+//
+// 	constexpr FLinearColor Black(0.0f, 0.0f, 0.0f);
+// 	return Black;
+// }
 
 //* PLAYER START STUFF
 void AMultiplayerTestGameModeBase::FindPlayerStarts()

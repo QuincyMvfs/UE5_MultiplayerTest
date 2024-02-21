@@ -41,8 +41,11 @@ public:
 
 	void PlayerLeft(AGameplayPlayerState* PlayerState);
 
-	// UFUNCTION(BlueprintCallable, BlueprintPure)
-	// FLinearColor SelectColor();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FLinearColor SelectColor();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FName GetRandomName();
 	//
 	// UFUNCTION()
 	// void RemoveColor(int Index);
@@ -63,4 +66,14 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	TArray<FLinearColor> BaseColors;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<FName> AvailableNames;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<FName> BaseNames;
+
+private:
+	void ConstructColours();
+	void ConstructNames();
 };

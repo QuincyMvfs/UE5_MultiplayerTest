@@ -31,8 +31,8 @@ public:
 	virtual APlayerStart* GetPlayerSpawnPoint();
 	virtual void RespawnPlayer(AController* PlayerToRespawn);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FLinearColor SelectColor();
+	// UFUNCTION(BlueprintCallable, BlueprintPure)
+	// FLinearColor SelectColor();
 
 public:
 	UPROPERTY(VisibleAnywhere)
