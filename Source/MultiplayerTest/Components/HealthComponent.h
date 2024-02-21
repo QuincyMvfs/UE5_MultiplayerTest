@@ -7,8 +7,8 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float, HealthPercent, AActor*, Damaged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, Killed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStunComplete);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, Killer);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UHealthComponent : public UActorComponent
@@ -66,6 +66,6 @@ public:
 	bool M_IsDead = false;
 	
 protected:
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	float m_currentHealth;
 };

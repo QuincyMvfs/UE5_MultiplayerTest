@@ -17,13 +17,13 @@ AMultiplayerGameStateBase::AMultiplayerGameStateBase()
 
 void AMultiplayerGameStateBase::ConstructColours()
 {
-	constexpr FLinearColor RedColor(1.0f, 0.0f, 0.0f);
+	constexpr FLinearColor CyanColor(0.0f, 1.0f, 1.0f);
 	constexpr FLinearColor BlueColor(0.0f, 0.0f, 1.0f);
 	constexpr FLinearColor YellowColor(1.0f, 1.0f, 0.0f);
 	constexpr FLinearColor GreenColor(0.0f, 1.0f, 0.0f);
-	constexpr FLinearColor PurpleColor(0.0f, 1.0f, 1.0f);
+	constexpr FLinearColor PurpleColor(1.0f, 0.0f, 1.0f);
 
-	BaseColors.Add(RedColor);
+	BaseColors.Add(CyanColor);
 	BaseColors.Add(BlueColor);
 	BaseColors.Add(YellowColor);
 	BaseColors.Add(GreenColor);
@@ -60,6 +60,19 @@ void AMultiplayerGameStateBase::PlayerHit()
 }
 
 void AMultiplayerGameStateBase::PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor)
+{
+	if (HasAuthority()) { Multi_PlayerCreated(PlayerState, CreatedActor); }
+	else { Server_PlayerCreated(PlayerState, CreatedActor); }
+}
+
+void AMultiplayerGameStateBase::Server_PlayerCreated_Implementation(AGameplayPlayerState* PlayerState,
+	AGameplayActor* CreatedActor)
+{
+	Multi_PlayerCreated(PlayerState, CreatedActor);
+}
+
+void AMultiplayerGameStateBase::Multi_PlayerCreated_Implementation(AGameplayPlayerState* PlayerState,
+	AGameplayActor* CreatedActor)
 {
 	PlayerState->M_PlayerPawn = CreatedActor;
 	OnPlayerCreatedEvent.Broadcast(PlayerState);

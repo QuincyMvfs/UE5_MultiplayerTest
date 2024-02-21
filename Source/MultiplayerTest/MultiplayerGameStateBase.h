@@ -28,6 +28,15 @@ public:
 	void PlayerHit();
 
 	void PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
+	void Server_PlayerCreated_Implementation(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multi_PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
+	void Multi_PlayerCreated_Implementation(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
+	
 	
 	void PlayerJoined(AGameplayPlayerState* PlayerState);
 
@@ -46,13 +55,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FName GetRandomName();
-	//
-	// UFUNCTION()
-	// void RemoveColor(int Index);
-	//
-	// UFUNCTION(Server, Unreliable)
-	// void Server_RemoveColor(int Index);
-	// void Server_RemoveColor_Implementation(int Index);
 	
 public:
 	UPROPERTY(Replicated)
