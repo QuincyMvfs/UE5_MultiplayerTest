@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+class AMultiplayerGameStateBase;
+enum class ETeams : uint8;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float, HealthPercent, AActor*, Damaged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnKilled, AActor*, Killed, AActor*, Killer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStunComplete);
@@ -71,6 +73,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float M_HitDuration = 0.2f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	ETeams M_Team;
+
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsHit = false;
 
@@ -80,6 +85,8 @@ public:
 protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	float m_currentHealth;
+
+	AMultiplayerGameStateBase* m_gameStateRef;
 
 	APawn* m_pawnOwner;
 };

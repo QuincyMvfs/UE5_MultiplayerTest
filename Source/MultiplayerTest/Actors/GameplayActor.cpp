@@ -50,6 +50,7 @@ AGameplayActor::AGameplayActor()
 	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
 	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
 	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	M_PlayerHealthComponent->M_Team = ETeams::Humans;
 	M_PlayerHealthComponent->OnKilledEvent.AddDynamic(this, &AGameplayActor::SetDead);
 }
 //*

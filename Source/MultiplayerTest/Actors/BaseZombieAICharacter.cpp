@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "MultiplayerTest/Components/HealthComponent.h"
+#include "MultiplayerTest/EnumClasses/ETeams.h"
 #include "Perception/PawnSensingComponent.h"
 
 
@@ -23,6 +24,7 @@ ABaseZombieAICharacter::ABaseZombieAICharacter()
 	
 	// Health
 	M_HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	M_HealthComponent->M_Team = ETeams::Zombies;
 	M_HealthComponent->OnKilledEvent.AddDynamic(this, &ABaseZombieAICharacter::Dead);
 }
 

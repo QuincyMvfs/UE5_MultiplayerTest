@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UTeamInfoComponent;
 class UWidgetComponent;
 class UHealthComponent;
 class UCameraZoomComponent;

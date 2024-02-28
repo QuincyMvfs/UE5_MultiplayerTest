@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EnumClasses/ETeams.h"
 #include "GameFramework/PlayerState.h"
 #include "GameplayPlayerState.generated.h"
 
+enum class ETeams : uint8;
 class AGameplayActor;
-/**
- * 
- */
+
 UCLASS()
 class MULTIPLAYERTEST_API AGameplayPlayerState : public APlayerState
 {

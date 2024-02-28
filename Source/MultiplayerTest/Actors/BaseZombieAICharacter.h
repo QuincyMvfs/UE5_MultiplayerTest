@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "BaseZombieAICharacter.generated.h"
 
+class UTeamInfoComponent;
 class UHealthComponent;
 class USphereComponent;
 class UPawnSensingComponent;

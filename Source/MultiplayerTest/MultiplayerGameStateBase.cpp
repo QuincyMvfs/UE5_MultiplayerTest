@@ -5,6 +5,7 @@
 
 #include "GameplayPlayerState.h"
 #include "IndexTypes.h"
+#include "MultiplayerTestGameModeBase.h"
 #include "Net/UnrealNetwork.h"
 
 AMultiplayerGameStateBase::AMultiplayerGameStateBase()

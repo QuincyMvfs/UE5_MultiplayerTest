@@ -75,6 +75,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	TArray<FName> BaseNames;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool M_FriendlyFire = false;
+
 private:
 	void ConstructColours();
 	void ConstructNames();

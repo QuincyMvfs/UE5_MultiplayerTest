@@ -4,6 +4,7 @@
 #include "HealthComponent.h"
 
 #include "MultiplayerTest/GameplayPlayerState.h"
+#include "MultiplayerTest/MultiplayerGameStateBase.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -21,6 +22,7 @@ void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	m_gameStateRef = GetWorld()->GetGameState<AMultiplayerGameStateBase>();
 	m_currentHealth = M_MaxHealth;
 	M_IsDead = false;
 	M_IsHit = false;
@@ -47,6 +49,14 @@ void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Ins
 	
 	if (m_currentHealth > 0)
 	{
+		if (UHealthComponent* InstigatorHealth = Instigator->GetComponentByClass<UHealthComponent>())
+		{
+			if (InstigatorHealth->M_Team == this->M_Team && !m_gameStateRef->M_FriendlyFire)
+			{
+				return;
+			}
+		}
+		
 		const float MultipliedAmount = GetMultipliedDamage(Amount, HitBone);
 		m_currentHealth -= MultipliedAmount;
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
