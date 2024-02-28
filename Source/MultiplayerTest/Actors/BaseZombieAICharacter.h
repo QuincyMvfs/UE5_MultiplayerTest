@@ -57,7 +57,7 @@ public:
 	virtual void Multi_AIAttack_Implementation();
 
 	UFUNCTION(BlueprintCallable)
-	virtual void Dead(AActor* Killer);
+	virtual void Dead(AActor* Killed, AActor* Killer);
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

@@ -59,7 +59,7 @@ void ABaseZombieAICharacter::Multi_AIAttack_Implementation()
 	}
 }
 
-void ABaseZombieAICharacter::Dead(AActor* Killer)
+void ABaseZombieAICharacter::Dead(AActor* Killed, AActor* Killer)
 {
 	M_CapsuleComponent->SetCollisionProfileName("DeadPlayer");
 }

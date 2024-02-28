@@ -138,11 +138,11 @@ public:
 	//*
 
 	UFUNCTION()
-	void SetDead(AActor* Killer);
+	void SetDead(AActor* Killed, AActor* Killer);
 
 	UFUNCTION(Server, Reliable)
-	void Server_SetDead(AActor* Killer);
-	void Server_SetDead_Implementation(AActor* Killer);
+	void Server_SetDead(AActor* Killed, AActor* Killer);
+	void Server_SetDead_Implementation(AActor* Killed, AActor* Killer);
 	//
 	// UFUNCTION(NetMulticast, Reliable)
 	// void Multi_SetDead(AActor* Killer);

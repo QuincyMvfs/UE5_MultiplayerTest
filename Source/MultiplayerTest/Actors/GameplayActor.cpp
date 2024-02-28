@@ -332,7 +332,7 @@ void AGameplayActor::Reload()
 	M_WeaponComponent->TryReload();
 }
 
-void AGameplayActor::SetDead(AActor* Killer)
+void AGameplayActor::SetDead(AActor* Killed, AActor* Killer)
 {
 	if (M_CurrentState == EMovementStates::Dead) return;
 	
@@ -344,7 +344,7 @@ void AGameplayActor::SetDead(AActor* Killer)
 
 	if (IsLocallyControlled())
 	{
-		Server_SetDead(Killer);
+		Server_SetDead(Killed, Killer);
 	}
 	
 	if (GetWorld())
@@ -356,11 +356,18 @@ void AGameplayActor::SetDead(AActor* Killer)
 	
 }
 
-void AGameplayActor::Server_SetDead_Implementation(AActor* Killer)
+void AGameplayActor::Server_SetDead_Implementation(AActor* Killed, AActor* Killer)
 {
 	if (AGameplayPlayerState* PS = GetPlayerState<AGameplayPlayerState>())
 	{
 		PS->PlayerDied();
+		if (APawn* KillerPawn = Cast<APawn>(Killer))
+		{
+			if (AGameplayPlayerState* KPS = KillerPawn->GetPlayerState<AGameplayPlayerState>())
+			{
+				KPS->PlayerGotKill();
+			}
+		}
 	}
 }
 

@@ -37,7 +37,7 @@ void AGameplayPlayerState::PlayerTookDamage(float Amount)
 {
 	if (HasAuthority())
 	{
-		M_DamageTaken += Amount;
+		M_DamageTaken = M_DamageTaken + Amount;
 		UE_LOG(LogTemp, Warning, TEXT("%s: Took %f Damage"), *M_PlayerName.ToString(), Amount);
 	}
 }
@@ -46,7 +46,7 @@ void AGameplayPlayerState::PlayerDealtDamage(float Amount)
 {
 	if (HasAuthority())
 	{
-		M_DamageDealt += Amount;
+		M_DamageDealt = M_DamageDealt + Amount;
 		UE_LOG(LogTemp, Warning, TEXT("%s: Dealt %f Damage"), *M_PlayerName.ToString(), Amount);
 	}
 }

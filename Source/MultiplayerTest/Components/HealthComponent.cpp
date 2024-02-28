@@ -3,6 +3,7 @@
 
 #include "HealthComponent.h"
 
+#include "MultiplayerTest/GameplayPlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -11,6 +12,7 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	m_currentHealth = M_MaxHealth;
+	m_pawnOwner = Cast<APawn>(GetOwner());
 }
 
 
@@ -41,18 +43,27 @@ void UHealthComponent::TakeDamage(float Amount, AActor* Instigator, AActor* Vict
 bool UHealthComponent::Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, FName HitBone) { return true; }
 void UHealthComponent::Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, FName HitBone)
 {
+	if (M_IsDead) return;
+	
 	if (m_currentHealth > 0)
 	{
 		const float MultipliedAmount = GetMultipliedDamage(Amount, HitBone);
 		m_currentHealth -= MultipliedAmount;
 		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
+
+		if (m_pawnOwner && m_pawnOwner->IsLocallyControlled())
+		{
+			Server_SendDamageDealtValues(Instigator, MultipliedAmount);
+		}
+		
 		OnDamagedEvent.Broadcast(m_currentHealth / M_MaxHealth, Victim);
 		SetIsHit();
+
 	}
 
 	if (m_currentHealth <= 0)
 	{
-		OnKilledEvent.Broadcast(Victim);
+		OnKilledEvent.Broadcast(Victim, Instigator);
 		M_IsDead = true;
 	}
 }
@@ -84,5 +95,38 @@ void UHealthComponent::Multi_SetIsNotHit_Implementation()
 {
 	M_IsHit = false;
 	OnStunCompletedEvent.Broadcast();
+}
+
+void UHealthComponent::SendDamageDealtValues(AActor* Instigator, float Amount)
+{
+	if (AGameplayPlayerState* PS = m_pawnOwner->GetPlayerState<AGameplayPlayerState>())
+	{
+		PS->PlayerTookDamage(Amount);
+		if (APawn* EnemyPawn = Cast<APawn>(Instigator))
+		{
+			if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
+			{
+				EPS->PlayerDealtDamage(Amount);
+				UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
+			}
+		}
+	}
+	
+}
+
+void UHealthComponent::Server_SendDamageDealtValues_Implementation(AActor* Instigator, float Amount)
+{
+	if (AGameplayPlayerState* PS = m_pawnOwner->GetPlayerState<AGameplayPlayerState>())
+	{
+		PS->PlayerTookDamage(Amount);
+		if (APawn* EnemyPawn = Cast<APawn>(Instigator))
+		{
+			if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
+			{
+				EPS->PlayerDealtDamage(Amount);
+				UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
+			}
+		}
+	}
 }
 

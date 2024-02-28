@@ -7,7 +7,7 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float, HealthPercent, AActor*, Damaged);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, Killed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnKilled, AActor*, Killed, AActor*, Killer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStunComplete);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -39,6 +39,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Health)
 	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
 
+	// UFUNCTION(Server, Reliable)
+	// void Server_TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
+	// void Server_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
+	
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
 	bool Multi_TakeDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
@@ -52,6 +56,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multi_SetIsNotHit();
 	void Multi_SetIsNotHit_Implementation();
+
+	UFUNCTION()
+	void SendDamageDealtValues(AActor* Instigator, float Amount);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SendDamageDealtValues(AActor* Instigator, float Amount);
+	void Server_SendDamageDealtValues_Implementation(AActor* Instigator, float Amount);
+
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float M_MaxHealth = 100.0f;
@@ -68,4 +80,6 @@ public:
 protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	float m_currentHealth;
+
+	APawn* m_pawnOwner;
 };
