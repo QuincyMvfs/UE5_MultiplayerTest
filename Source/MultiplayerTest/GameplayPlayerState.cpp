@@ -18,13 +18,44 @@ void AGameplayPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(AGameplayPlayerState, M_PlayerPawn);
 	DOREPLIFETIME(AGameplayPlayerState, M_PlayerColor);
 	DOREPLIFETIME(AGameplayPlayerState, M_PlayerName);
+	DOREPLIFETIME(AGameplayPlayerState, M_Kills);
+	DOREPLIFETIME(AGameplayPlayerState, M_DamageDealt);
+	DOREPLIFETIME(AGameplayPlayerState, M_DamageTaken);
+	DOREPLIFETIME(AGameplayPlayerState, M_Deaths);
 }
 
-void AGameplayPlayerState::PlayerHit()
+void AGameplayPlayerState::PlayerGotKill()
 {
 	if (HasAuthority())
 	{
-		M_TotalHits++;
-		UE_LOG(LogTemp, Warning, TEXT("PLAYER HITS: %d"), M_TotalHits)
+		M_Kills++;
+		UE_LOG(LogTemp, Warning, TEXT("%s: Kill Scored"), *M_PlayerName.ToString())
+	}
+}
+
+void AGameplayPlayerState::PlayerTookDamage(float Amount)
+{
+	if (HasAuthority())
+	{
+		M_DamageTaken += Amount;
+		UE_LOG(LogTemp, Warning, TEXT("%s: Took %f Damage"), *M_PlayerName.ToString(), Amount);
+	}
+}
+
+void AGameplayPlayerState::PlayerDealtDamage(float Amount)
+{
+	if (HasAuthority())
+	{
+		M_DamageDealt += Amount;
+		UE_LOG(LogTemp, Warning, TEXT("%s: Dealt %f Damage"), *M_PlayerName.ToString(), Amount);
+	}
+}
+
+void AGameplayPlayerState::PlayerDied()
+{
+	if (HasAuthority())
+	{
+		M_Deaths++;
+		UE_LOG(LogTemp, Warning, TEXT("%s: Died"), *M_PlayerName.ToString())
 	}
 }

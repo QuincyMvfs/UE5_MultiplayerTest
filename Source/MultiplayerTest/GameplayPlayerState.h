@@ -20,18 +20,36 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	void PlayerHit();
-	
+	void PlayerGotKill();
+	void PlayerTookDamage(float Amount);
+	void PlayerDealtDamage(float Amount);
+	void PlayerDied();
+
+public:
 	UPROPERTY(Replicated)
 	uint16 M_TotalHits;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly)
 	AGameplayActor* M_PlayerPawn;
-	
+
+	// User Stats
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FLinearColor M_PlayerColor;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FName M_PlayerName;
+
+	// Game Stats
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	int M_Kills = 0;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	float M_DamageDealt = 0.0f;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	float M_DamageTaken = 0.0f;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	int M_Deaths = 0;
 
 };

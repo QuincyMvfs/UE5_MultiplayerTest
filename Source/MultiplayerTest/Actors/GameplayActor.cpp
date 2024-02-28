@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
 #include "MultiplayerTest/GameplayPlayerController.h"
+#include "MultiplayerTest/GameplayPlayerState.h"
 #include "MultiplayerTest/MultiplayerTestGameModeBase.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
@@ -333,12 +334,19 @@ void AGameplayActor::Reload()
 
 void AGameplayActor::SetDead(AActor* Killer)
 {
+	if (M_CurrentState == EMovementStates::Dead) return;
+	
 	M_CurrentState = EMovementStates::Dead;
 	M_PlayerCapsuleComponent->SetCollisionProfileName("DeadPlayer");
 	M_CameraSpringArm->bDoCollisionTest = false;
 	
 	OnRespawnEvent.Broadcast();
 
+	if (IsLocallyControlled())
+	{
+		Server_SetDead(Killer);
+	}
+	
 	if (GetWorld())
 	{
 		FTimerHandle RespawnTimer;
@@ -346,6 +354,14 @@ void AGameplayActor::SetDead(AActor* Killer)
 			RespawnTimer, this, &AGameplayActor::Respawn, M_RespawnDelay);
 	}
 	
+}
+
+void AGameplayActor::Server_SetDead_Implementation(AActor* Killer)
+{
+	if (AGameplayPlayerState* PS = GetPlayerState<AGameplayPlayerState>())
+	{
+		PS->PlayerDied();
+	}
 }
 
 void AGameplayActor::Respawn()

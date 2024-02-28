@@ -52,3 +52,11 @@ void UEnemyHealthDisplay::CheckForEnemies()
 	}
 }
 
+void UEnemyHealthDisplay::DisplayHealthBar()
+{
+}
+
+void UEnemyHealthDisplay::RemoveHealthBar()
+{
+}
+
