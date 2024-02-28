@@ -112,13 +112,14 @@ void UHealthComponent::SendDamageDealtValues(AActor* Instigator, float Amount)
 	if (AGameplayPlayerState* PS = m_pawnOwner->GetPlayerState<AGameplayPlayerState>())
 	{
 		PS->PlayerTookDamage(Amount);
-		if (APawn* EnemyPawn = Cast<APawn>(Instigator))
+	}
+	
+	if (APawn* EnemyPawn = Cast<APawn>(Instigator))
+	{
+		if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
 		{
-			if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
-			{
-				EPS->PlayerDealtDamage(Amount);
-				UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
-			}
+			EPS->PlayerDealtDamage(Amount);
+			UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
 		}
 	}
 	
@@ -129,13 +130,14 @@ void UHealthComponent::Server_SendDamageDealtValues_Implementation(AActor* Insti
 	if (AGameplayPlayerState* PS = m_pawnOwner->GetPlayerState<AGameplayPlayerState>())
 	{
 		PS->PlayerTookDamage(Amount);
-		if (APawn* EnemyPawn = Cast<APawn>(Instigator))
+	}
+
+	if (APawn* EnemyPawn = Cast<APawn>(Instigator))
+	{
+		if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
 		{
-			if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
-			{
-				EPS->PlayerDealtDamage(Amount);
-				UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
-			}
+			EPS->PlayerDealtDamage(Amount);
+			UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
 		}
 	}
 }

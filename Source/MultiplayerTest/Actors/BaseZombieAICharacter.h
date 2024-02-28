@@ -59,6 +59,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Dead(AActor* Killed, AActor* Killer);
+
+	UFUNCTION(Server, Reliable)
+	virtual void Server_Dead(AActor* Killed, AActor* Killer);
+	virtual void Server_Dead_Implementation(AActor* Killed, AActor* Killer);
+
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

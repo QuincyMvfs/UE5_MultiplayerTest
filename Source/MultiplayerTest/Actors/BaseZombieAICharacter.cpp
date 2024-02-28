@@ -4,6 +4,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "MultiplayerTest/GameplayPlayerState.h"
 #include "MultiplayerTest/Components/HealthComponent.h"
 #include "MultiplayerTest/EnumClasses/ETeams.h"
 #include "Perception/PawnSensingComponent.h"
@@ -63,7 +64,20 @@ void ABaseZombieAICharacter::Multi_AIAttack_Implementation()
 
 void ABaseZombieAICharacter::Dead(AActor* Killed, AActor* Killer)
 {
+	if (IsLocallyControlled()) { Server_Dead_Implementation(Killed, Killer); }
+}
+
+void ABaseZombieAICharacter::Server_Dead_Implementation(AActor* Killed, AActor* Killer)
+{
 	M_CapsuleComponent->SetCollisionProfileName("DeadPlayer");
+	if (APawn* KillerPawn = Cast<APawn>(Killer))
+	{
+		if (AGameplayPlayerState* KPS = KillerPawn->GetPlayerState<AGameplayPlayerState>())
+		{
+			KPS->PlayerGotKill();
+		}
+	}
+
 }
 
 

@@ -76,7 +76,7 @@ public:
 	TArray<FName> BaseNames;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool M_FriendlyFire = false;
+	bool M_FriendlyFire = true;
 
 private:
 	void ConstructColours();
