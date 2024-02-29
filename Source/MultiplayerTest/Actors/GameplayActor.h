@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UVFXReplicationComponent;
 class UTeamInfoComponent;
 class UWidgetComponent;
 class UHealthComponent;
@@ -56,6 +57,8 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UHealthComponent* M_PlayerHealthComponent;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	UVFXReplicationComponent* M_VFXReplicationComponent;
 	//*
 	
 public:

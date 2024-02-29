@@ -14,6 +14,10 @@ class USoundCue;
 class AGrenadeProjectile;
 class UCameraComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShoot);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHit, FVector, HitLocation, FRotator, HitRotation,
+	EObjectTypes, ObjectType, bool, bIsHeadshot);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UBaseWeaponComponent : public UActorComponent
 {
@@ -29,6 +33,12 @@ protected:
 public:	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnShoot OnShootEvent;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnHit OnHitEvent;
+	
 	// SHOOTING CLIENT + SERVER
 	virtual bool TryShootWeapon();
 	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
@@ -94,7 +104,7 @@ public:
 	UNiagaraSystem* M_BulletTracer;
 
 protected:
-	virtual FVector PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter);
+	virtual FVector PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter, bool bDealDamage);
 	virtual void SpawnBulletTracer(FVector startPoint, FVector endPoint, FRotator rotation);
 	
 protected:

@@ -10,6 +10,7 @@
 #include "MultiplayerTest/GameplayPlayerState.h"
 #include "MultiplayerTest/MultiplayerTestGameModeBase.h"
 #include "MultiplayerTest/Actors/GameplayActor.h"
+#include "MultiplayerTest/EnumClasses/EObjectTypes.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -40,25 +41,6 @@ void UBaseWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(UBaseWeaponComponent, m_muzzleLocation);
 }
 
-// SHOOT
-void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
-{
-	if (TryShootWeapon())
-	{
-		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
-		m_currentMagazine--;
-
-		// m_startPoint = cameraComponent->GetComponentLocation();
-		// m_forwardVector = cameraComponent->GetForwardVector();
-		// m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
-		// m_muzzleLocation = muzzleLocation; 
-		// m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
-		
-		// Check Authority, and check if the shooter is locally controlled to prevent client from shooting
-		Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
-	}
-}
-
 // CHECK ALL VARIABLES TO SEE IF PLAYER CAN SHOOT
 bool UBaseWeaponComponent::TryShootWeapon()
 {
@@ -75,16 +57,40 @@ bool UBaseWeaponComponent::TryShootWeapon()
 	return false;
 }
 
+// SHOOT
+void UBaseWeaponComponent::ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
+{
+	if (TryShootWeapon())
+	{
+		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + M_DelayBetweenShots;
+		m_currentMagazine--;
+
+		if (m_pawnOwner->IsLocallyControlled())
+		{
+			m_startPoint = cameraComponent->GetComponentLocation();
+			m_forwardVector = cameraComponent->GetForwardVector();
+			m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
+			m_muzzleLocation = muzzleLocation; 
+			m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter, false);
+			
+			SpawnBulletTracer(muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
+		}
+
+		Server_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
+	}
+}
+
 // CLIENT SHOOT
 void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent,
 	AActor* shooter, FVector muzzleLocation)
 {
 	// Check if the hit registered on the server
+	OnShootEvent.Broadcast();
 	m_startPoint = cameraComponent->GetComponentLocation();
 	m_forwardVector = cameraComponent->GetForwardVector();
 	m_rayEndPoint = m_startPoint + (m_forwardVector * m_rayLength);
 	m_muzzleLocation = muzzleLocation; 
-	m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter);
+	m_hitEndPoint = PerformRaycast(m_startPoint, m_rayEndPoint, shooter, true);
 
 	// Spawn tracers and play sound on all other clients
 	Multi_OnShootWeapon(cameraComponent, shooter, muzzleLocation);
@@ -93,9 +99,12 @@ void UBaseWeaponComponent::Server_OnShootWeapon_Implementation(UCameraComponent*
 // SERVER SHOOT
 void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation)
 {
-	if (IsValid(m_pawnOwner))
+	if (m_pawnOwner)
 	{
-		SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
+		if (!m_pawnOwner->IsLocallyControlled())
+		{
+			SpawnBulletTracer(m_muzzleLocation, m_hitEndPoint, FRotator::ZeroRotator);
+		}
 	
 		if (M_FireSound)
 		{
@@ -104,56 +113,34 @@ void UBaseWeaponComponent::Multi_OnShootWeapon_Implementation(UCameraComponent* 
 	}
 }
 
-void UBaseWeaponComponent::TryReload()
+FVector UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter, bool bDealDamage)
 {
-	if (m_currentMagazine < M_MaxMagazineCapacity && !M_IsReloading)
-	{
-		M_IsReloading = true;
-		FTimerHandle ReloadTimer;
-		GetWorld()->GetTimerManager().SetTimer(
-			ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
-
-		if (!GetOwner()->HasAuthority()) { Server_TryReload(); }
-		else { Multi_TryReload(); }
-	}
-}
-
-bool UBaseWeaponComponent::Server_TryReload_Validate() { return true; }
-void UBaseWeaponComponent::Server_TryReload_Implementation()
-{
-	Multi_TryReload();
-}
-
-bool UBaseWeaponComponent::Multi_TryReload_Validate() { return true; }
-void UBaseWeaponComponent::Multi_TryReload_Implementation()
-{
-	M_IsReloading = true;
-	FTimerHandle ReloadTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
-}
-
-void UBaseWeaponComponent::Reload()
-{
-	M_IsReloading = false;
-	m_currentMagazine = M_MaxMagazineCapacity;
-}
-
-
-FVector UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoint, AActor* shooter)
-{
+	EObjectTypes ObjectType = EObjectTypes::Concrete;
 	FHitResult hitResult;
 	if (bool hitObject = UKismetSystemLibrary::LineTraceSingle(
 		this, startPoint, endPoint, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1),
 		true, TArray<AActor*>(), EDrawDebugTrace::None, hitResult,
 		true))
 	{
+		bool HasHitActor = false;
+		bool IsHeadshot = false;
+		
 		if (AActor* hitActor = hitResult.GetActor())
 		{
 			if (UHealthComponent* hitHealth = hitActor->FindComponentByClass<UHealthComponent>())
 			{
-				DealDamage(M_Damage, shooter, hitActor, hitHealth, hitResult.BoneName);
+				if (bDealDamage) DealDamage(M_Damage, shooter, hitActor, hitHealth, hitResult.BoneName);
+				HasHitActor = true;
+				if (hitResult.BoneName == "Head") { IsHeadshot = true; }
 			}
+		}
+
+		if (bDealDamage)
+		{
+			FVector SurfaceNormal = hitResult.ImpactNormal;
+			FRotator SpawnRotation = SurfaceNormal.Rotation() + FRotator(0.0, 180.0f, 0);
+			if (HasHitActor) ObjectType = EObjectTypes::Flesh;
+			OnHitEvent.Broadcast(hitResult.ImpactPoint, SpawnRotation, ObjectType, IsHeadshot);
 		}
 		
 		return hitResult.Location;
@@ -192,5 +179,41 @@ void UBaseWeaponComponent::Multi_DealDamage_Implementation(float Amount, AActor*
 	UHealthComponent* HitHealth, FName HitBone)
 {
 	HitHealth->TakeDamage(Amount, Instigator, Victim, HitBone);
+}
+
+
+void UBaseWeaponComponent::TryReload()
+{
+	if (m_currentMagazine < M_MaxMagazineCapacity && !M_IsReloading)
+	{
+		M_IsReloading = true;
+		FTimerHandle ReloadTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
+
+		if (!GetOwner()->HasAuthority()) { Server_TryReload(); }
+		else { Multi_TryReload(); }
+	}
+}
+
+bool UBaseWeaponComponent::Server_TryReload_Validate() { return true; }
+void UBaseWeaponComponent::Server_TryReload_Implementation()
+{
+	Multi_TryReload();
+}
+
+bool UBaseWeaponComponent::Multi_TryReload_Validate() { return true; }
+void UBaseWeaponComponent::Multi_TryReload_Implementation()
+{
+	M_IsReloading = true;
+	FTimerHandle ReloadTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
+}
+
+void UBaseWeaponComponent::Reload()
+{
+	M_IsReloading = false;
+	m_currentMagazine = M_MaxMagazineCapacity;
 }
 

@@ -15,6 +15,7 @@
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
 #include "MultiplayerTest/Components/HealthComponent.h"
+#include "MultiplayerTest/Components/VFXReplicationComponent.h"
 #include "Net/UnrealNetwork.h"
 
 //* Sets default values
@@ -52,6 +53,7 @@ AGameplayActor::AGameplayActor()
 	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	M_PlayerHealthComponent->M_Team = ETeams::Humans;
 	M_PlayerHealthComponent->OnKilledEvent.AddDynamic(this, &AGameplayActor::SetDead);
+	M_VFXReplicationComponent = CreateDefaultSubobject<UVFXReplicationComponent>(TEXT("VFXReplicationComponent"));
 }
 //*
 
