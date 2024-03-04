@@ -14,7 +14,6 @@ enum class ENiagaraType : uint8
 {
 	AtLocation UMETA(DisplayName = "AtLocation"),
 	SystemAttached UMETA(DisplayName = "SystemAttached"),
-	AtLocationEndPoint UMETA(DisplayName = "AtLocationEndPoint")
 };
 
 

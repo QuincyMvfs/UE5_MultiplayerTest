@@ -138,7 +138,7 @@ FVector UBaseWeaponComponent::PerformRaycast(FVector startPoint, FVector endPoin
 		if (bDealDamage)
 		{
 			FVector SurfaceNormal = hitResult.ImpactNormal;
-			FRotator SpawnRotation = SurfaceNormal.Rotation() + FRotator(0.0, 180.0f, 0);
+			FRotator SpawnRotation = SurfaceNormal.Rotation() + FRotator(180.0f, 180.0f, 180.0f);
 			if (HasHitActor) ObjectType = EObjectTypes::Flesh;
 			OnHitEvent.Broadcast(hitResult.ImpactPoint, SpawnRotation, ObjectType, IsHeadshot);
 		}
