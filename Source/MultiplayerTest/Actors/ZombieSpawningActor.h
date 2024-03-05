@@ -25,8 +25,11 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintCallable)
+	void StartWave();
 	
-	UFUNCTION(BlueprintCallable, Server, Reliable)
+	UFUNCTION(Server, Reliable)
 	void Server_StartWave();
 	void Server_StartWave_Implementation();
 
@@ -34,10 +37,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FWave> M_Waves;
 
-private:
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	int M_RemainingEnemiesCount = 0;
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	int M_CurrentWave = 0;
+	
+private:
 	UPROPERTY(Replicated)
 	TArray<AActor*> M_SpawnedEnemies;
 };

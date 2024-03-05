@@ -25,9 +25,17 @@ void AZombieSpawningActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(AZombieSpawningActor, M_SpawnedEnemies);
 }
 
+void AZombieSpawningActor::StartWave()
+{
+	if (HasAuthority()) Server_StartWave();
+}
+
 void AZombieSpawningActor::Server_StartWave_Implementation()
 {
-	
+	for (FWave Wave : M_Waves)
+	{
+		M_RemainingEnemiesCount += Wave.WaveEnemies.Num();
+	}
 }
 
 
