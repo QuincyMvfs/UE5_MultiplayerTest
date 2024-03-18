@@ -163,11 +163,9 @@ void AGameplayPlayerController::ScoreboardEnable(const FInputActionValue& Value)
 {
 	M_CreatedWidget = CreateWidget<UUserWidget>(this, M_ScoreboardWidget);
 	if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
-	UE_LOG(LogTemp, Warning, TEXT("ON"))
 }
 
 void AGameplayPlayerController::ScoreboardDisable(const FInputActionValue& Value)
 {
 	M_CreatedWidget->RemoveFromParent();
-	UE_LOG(LogTemp, Warning, TEXT("OFF"))
 }
