@@ -9,6 +9,7 @@
 #include "MultiplayerTestGameModeBase.h"
 #include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
+#include "Blueprint/UserWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "Net/UnrealNetwork.h"
 
@@ -30,6 +31,7 @@ void AGameplayPlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(M_MovementMappingContext, 0);
 		Subsystem->AddMappingContext(M_CombatMappingContext, 1);
+		Subsystem->AddMappingContext(M_UIMappingContext, 2);
 	}
 	
 	SetupInputComponent();
@@ -46,30 +48,48 @@ void AGameplayPlayerController::SetupInputComponent()
 			M_InputSet = true;
 			
 			// Movement
-			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Move);
-			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Look);
+			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Move);
+			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Look);
 
 			// Jumping
-			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Jump);
+			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Jump);
 
 			// Crouching
-			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Crouch);
-			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Crouch);
+			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Crouch);
+			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Crouch);
 
 			// Sprinting
-			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Run);
-			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Run);
+			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Run);
+			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Run);
 
 			// Shooting
-			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Shoot);
-			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Shoot);
+			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Shoot);
+			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Shoot);
 			
 			// Aiming
-			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
-			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
+			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Aim);
+			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Aim);
 
 			// Reloading
-			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Reload);
+			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Reload);
+
+			// Scoreboard
+			EnhancedInputComponent->BindAction(M_ToggleScoreboardInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::ScoreboardEnable);
+			EnhancedInputComponent->BindAction(M_ToggleScoreboardInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::ScoreboardDisable);
 		}
 	}
 }
@@ -137,4 +157,17 @@ void AGameplayPlayerController::Aim(const FInputActionValue& Value)
 void AGameplayPlayerController::Reload(const FInputActionValue& Value)
 {
 	if (M_PossessedPawn) M_PossessedPawn->Reload();
+}
+
+void AGameplayPlayerController::ScoreboardEnable(const FInputActionValue& Value)
+{
+	M_CreatedWidget = CreateWidget<UUserWidget>(this, M_ScoreboardWidget);
+	if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
+	UE_LOG(LogTemp, Warning, TEXT("ON"))
+}
+
+void AGameplayPlayerController::ScoreboardDisable(const FInputActionValue& Value)
+{
+	M_CreatedWidget->RemoveFromParent();
+	UE_LOG(LogTemp, Warning, TEXT("OFF"))
 }

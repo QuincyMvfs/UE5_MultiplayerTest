@@ -26,6 +26,9 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 	UInputMappingContext* M_CombatMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputMappingContext* M_UIMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_MovementInputAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
@@ -48,6 +51,9 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_ReloadInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_ToggleScoreboardInputAction;
 
 public:
 	AGameplayPlayerController();
@@ -82,6 +88,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Reload(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void ScoreboardEnable(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void ScoreboardDisable(const FInputActionValue& Value);
+
 public:
 	FVector2d M_MovementVector;
 	
@@ -92,6 +104,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool M_InputSet = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Widgets", meta=(AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> M_ScoreboardWidget;
+
+	UUserWidget* M_CreatedWidget;
 	
 };
 

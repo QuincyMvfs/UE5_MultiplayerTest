@@ -25,6 +25,10 @@ public:
 	void PlayerDealtDamage(float Amount);
 	void PlayerDied();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetPlayerStats(FName& Name, int& Kills, int& Deaths, float& DamageDealt,
+		float& DamageTaken, FLinearColor& Color);
+
 public:
 	UPROPERTY(Replicated)
 	uint16 M_TotalHits;

@@ -59,3 +59,14 @@ void AGameplayPlayerState::PlayerDied()
 		//UE_LOG(LogTemp, Warning, TEXT("%s: Died"), *M_PlayerName.ToString())
 	}
 }
+
+void AGameplayPlayerState::GetPlayerStats(FName& Name, int& Kills, int& Deaths, float& DamageDealt,
+	float& DamageTaken, FLinearColor& Color)
+{
+	Name = M_PlayerName;
+	Kills = M_Kills;
+	Deaths = M_Deaths;
+	DamageDealt = M_DamageDealt;
+	DamageTaken = M_DamageTaken;
+	Color = M_PlayerColor;
+}

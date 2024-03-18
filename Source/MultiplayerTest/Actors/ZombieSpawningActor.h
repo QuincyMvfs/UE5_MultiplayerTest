@@ -32,7 +32,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_StartWave();
 	void Server_StartWave_Implementation();
-
+	
 	AActor* GetSpawnPoint();
 
 	void RemoveSpawnedActor(AActor* Spawned, AActor* Killer);
