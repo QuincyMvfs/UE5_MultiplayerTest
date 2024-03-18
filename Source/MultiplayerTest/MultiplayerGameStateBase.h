@@ -10,7 +10,10 @@
 
 class AGameplayPlayerState;
 class AGameplayActor;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerCreated, AGameplayPlayerState*, PlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerJoined, AGameplayPlayerState*, PlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerLeft, AGameplayPlayerState*, PlayerState);
 
 UCLASS()
 class MULTIPLAYERTEST_API AMultiplayerGameStateBase : public AGameStateBase
@@ -24,6 +27,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerCreated OnPlayerCreatedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerJoined OnPlayerJoinedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerLeft OnPlayerLeftEvent;
 	
 	void PlayerHit();
 

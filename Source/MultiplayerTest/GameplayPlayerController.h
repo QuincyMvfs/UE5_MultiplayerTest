@@ -55,6 +55,9 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_ToggleScoreboardInputAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_TogglePauseMenuInputAction;
+
 public:
 	AGameplayPlayerController();
 
@@ -94,6 +97,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ScoreboardDisable(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseMenu(const FInputActionValue& Value);
+
 public:
 	FVector2d M_MovementVector;
 	
@@ -108,7 +114,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Widgets", meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> M_ScoreboardWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Widgets", meta=(AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> M_PauseMenuWidget;
+
 	UUserWidget* M_CreatedWidget;
+
+	bool M_IsPaused = false;
 	
 };
 

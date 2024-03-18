@@ -94,6 +94,7 @@ void AMultiplayerGameStateBase::Multi_PlayerJoined_Implementation(AGameplayPlaye
 {
 	if (!JoinedPlayers.Contains(PlayerState))
 	{
+		OnPlayerJoinedEvent.Broadcast(PlayerState);
 		JoinedPlayers.Add(PlayerState);
 	}
 }
@@ -101,6 +102,8 @@ void AMultiplayerGameStateBase::Multi_PlayerJoined_Implementation(AGameplayPlaye
 void AMultiplayerGameStateBase::PlayerLeft(AGameplayPlayerState* PlayerState)
 {
 	JoinedPlayers.Remove(PlayerState);
+	PlayerState->M_PlayerPawn->Destroy();
+	OnPlayerLeftEvent.Broadcast(PlayerState);
 }
 
 FLinearColor AMultiplayerGameStateBase::SelectColor()
