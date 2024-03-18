@@ -119,7 +119,7 @@ void UHealthComponent::SendDamageDealtValues(AActor* Instigator, float Amount)
 		if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
 		{
 			EPS->PlayerDealtDamage(Amount);
-			UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
+			//UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
 		}
 	}
 	
@@ -137,7 +137,7 @@ void UHealthComponent::Server_SendDamageDealtValues_Implementation(AActor* Insti
 		if (AGameplayPlayerState* EPS = EnemyPawn->GetPlayerState<AGameplayPlayerState>())
 		{
 			EPS->PlayerDealtDamage(Amount);
-			UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
+			//UE_LOG(LogTemp, Warning, TEXT("DAMAGE DEALT: %f"), EPS->M_DamageDealt)
 		}
 	}
 }

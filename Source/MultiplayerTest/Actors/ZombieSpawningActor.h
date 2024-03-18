@@ -33,6 +33,14 @@ public:
 	void Server_StartWave();
 	void Server_StartWave_Implementation();
 
+	AActor* GetSpawnPoint();
+
+	void RemoveSpawnedActor(AActor* Spawned, AActor* Killer);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveSpawnedActor(AActor* Spawned, AActor* Killer);
+	void Server_RemoveSpawnedActor_Implementation(AActor* Spawned, AActor* Killer);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FWave> M_Waves;
@@ -42,7 +50,10 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	int M_CurrentWave = 0;
-	
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<AActor*> M_SpawnPoints;
+	 
 private:
 	UPROPERTY(Replicated)
 	TArray<AActor*> M_SpawnedEnemies;

@@ -64,6 +64,10 @@ public:
 	virtual void Server_Dead(AActor* Killed, AActor* Killer);
 	virtual void Server_Dead_Implementation(AActor* Killed, AActor* Killer);
 
+	UFUNCTION(NetMulticast, Unreliable)
+	virtual void Multi_Dead(AActor* Killed, AActor* Killer);
+	virtual void Multi_Dead_Implementation(AActor* Killed, AActor* Killer);
+
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
