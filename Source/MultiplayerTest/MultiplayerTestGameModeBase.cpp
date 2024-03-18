@@ -42,7 +42,7 @@ void AMultiplayerTestGameModeBase::PostLogin(APlayerController* NewPlayer)
 void AMultiplayerTestGameModeBase::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
-
+	
 	if (APlayerController* PC = Cast<APlayerController>(Exiting))
 	{
 		if (AMultiplayerGameStateBase* GS = GetGameState<AMultiplayerGameStateBase>())
@@ -54,6 +54,8 @@ void AMultiplayerTestGameModeBase::Logout(AController* Exiting)
 
 void AMultiplayerTestGameModeBase::RespawnPlayer(AController* PlayerToRespawn)
 {
+	if (!PlayerToRespawn) return;
+	
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		if (APawn* PlayerPawn = PlayerToRespawn->GetPawn())

@@ -24,6 +24,8 @@ void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 void AGameplayPlayerController::BeginPlay()
 {
+	Super::BeginPlay();
+	
 	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =

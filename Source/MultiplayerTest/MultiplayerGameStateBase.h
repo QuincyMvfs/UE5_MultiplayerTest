@@ -59,6 +59,14 @@ public:
 
 	void PlayerLeft(AGameplayPlayerState* PlayerState);
 
+	UFUNCTION(Server, Reliable)
+	void Server_PlayerLeft(AGameplayPlayerState* PlayerState);
+	void Server_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayerLeft(AGameplayPlayerState* PlayerState);
+	void Multi_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FLinearColor SelectColor();
 

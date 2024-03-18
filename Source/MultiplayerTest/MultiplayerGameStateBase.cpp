@@ -101,8 +101,20 @@ void AMultiplayerGameStateBase::Multi_PlayerJoined_Implementation(AGameplayPlaye
 
 void AMultiplayerGameStateBase::PlayerLeft(AGameplayPlayerState* PlayerState)
 {
+	Server_PlayerLeft(PlayerState);
+}
+
+void AMultiplayerGameStateBase::Server_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState)
+{
 	JoinedPlayers.Remove(PlayerState);
 	PlayerState->M_PlayerPawn->Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("PLAYER LEFT: %s"), *PlayerState->M_PlayerName.ToString());
+	
+	Multi_PlayerLeft(PlayerState);
+}
+
+void AMultiplayerGameStateBase::Multi_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState)
+{
 	OnPlayerLeftEvent.Broadcast(PlayerState);
 }
 
