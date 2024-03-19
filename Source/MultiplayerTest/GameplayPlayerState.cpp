@@ -3,6 +3,7 @@
 
 #include "GameplayPlayerState.h"
 
+#include "MultiplayerGameStateBase.h"
 #include "Net/UnrealNetwork.h"
 
 AGameplayPlayerState::AGameplayPlayerState()
@@ -69,4 +70,20 @@ void AGameplayPlayerState::GetPlayerStats(FName& Name, int& Kills, int& Deaths, 
 	DamageDealt = M_DamageDealt;
 	DamageTaken = M_DamageTaken;
 	Color = M_PlayerColor;
+}
+
+void AGameplayPlayerState::SendMessageToGameState(const FString& Message)
+{
+	Server_SendMessageToGameState(Message);
+}
+
+void AGameplayPlayerState::Server_SendMessageToGameState_Implementation(const FString& Message)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (AMultiplayerGameStateBase* GS = Cast<AMultiplayerGameStateBase>(World->GetGameState()))
+		{
+			GS->SendMessage(this, Message);
+		}
+	}
 }

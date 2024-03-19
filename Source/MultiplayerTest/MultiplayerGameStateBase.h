@@ -14,6 +14,7 @@ class AGameplayActor;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerCreated, AGameplayPlayerState*, PlayerState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerJoined, AGameplayPlayerState*, PlayerState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerLeft, AGameplayPlayerState*, PlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMessageSent);
 
 UCLASS()
 class MULTIPLAYERTEST_API AMultiplayerGameStateBase : public AGameStateBase
@@ -25,6 +26,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//* DELEGATE EVENTS
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerCreated OnPlayerCreatedEvent;
 
@@ -33,9 +35,14 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerLeft OnPlayerLeftEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMessageSent OnMessageSentEvent;
+	//*
 	
 	void PlayerHit();
 
+	//* PLAYER PAWN CREATED
 	void PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
 
 	UFUNCTION(Server, Unreliable)
@@ -45,8 +52,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multi_PlayerCreated(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
 	void Multi_PlayerCreated_Implementation(AGameplayPlayerState* PlayerState, AGameplayActor* CreatedActor);
+	//*
 	
-	
+	//* PLAYER JOINED
 	void PlayerJoined(AGameplayPlayerState* PlayerState);
 
 	UFUNCTION(Server, Unreliable)
@@ -56,7 +64,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multi_PlayerJoined(AGameplayPlayerState* PlayerState);
 	void Multi_PlayerJoined_Implementation(AGameplayPlayerState* PlayerState);
-
+	//*
+	
+	//* PLAYER LEFT
 	void PlayerLeft(AGameplayPlayerState* PlayerState);
 
 	UFUNCTION(Server, Reliable)
@@ -66,12 +76,26 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multi_PlayerLeft(AGameplayPlayerState* PlayerState);
 	void Multi_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState);
-
+	//*
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FLinearColor SelectColor();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FName GetRandomName();
+
+	//* CHAT
+	UFUNCTION(BlueprintCallable)
+	void SendMessage(AGameplayPlayerState* PlayerState, const FString& Message);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SendMessage(AGameplayPlayerState* PlayerState, const FString& Message);
+	void Server_SendMessage_Implementation(AGameplayPlayerState* PlayerState, const FString& Message);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multi_SendMessage(AGameplayPlayerState* PlayerState, const FString& Message);
+	void Multi_SendMessage_Implementation(AGameplayPlayerState* PlayerState, const FString& Message);
+
 	
 public:
 	UPROPERTY(Replicated)
@@ -95,6 +119,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool M_FriendlyFire = true;
 
+	//* CHAT INFO
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<AGameplayPlayerState*> ChatUsers;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	TArray<FString> ChatMessages;
+	//*
+	
 private:
 	void ConstructColours();
 	void ConstructNames();

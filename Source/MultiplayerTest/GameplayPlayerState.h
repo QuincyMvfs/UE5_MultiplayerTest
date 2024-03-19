@@ -29,6 +29,14 @@ public:
 	void GetPlayerStats(FName& Name, int& Kills, int& Deaths, float& DamageDealt,
 		float& DamageTaken, FLinearColor& Color);
 
+	//* CHAT
+	UFUNCTION(BlueprintCallable)
+	void SendMessageToGameState(const FString& Message);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SendMessageToGameState(const FString& Message);
+	void Server_SendMessageToGameState_Implementation(const FString& Message);
+
 public:
 	UPROPERTY(Replicated)
 	uint16 M_TotalHits;

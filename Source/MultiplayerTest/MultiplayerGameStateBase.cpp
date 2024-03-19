@@ -53,6 +53,8 @@ void AMultiplayerGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 	DOREPLIFETIME(AMultiplayerGameStateBase, JoinedPlayers);
 	DOREPLIFETIME(AMultiplayerGameStateBase, AvailableColors);
 	DOREPLIFETIME(AMultiplayerGameStateBase, BaseColors);
+	DOREPLIFETIME(AMultiplayerGameStateBase, ChatUsers);
+	DOREPLIFETIME(AMultiplayerGameStateBase, ChatMessages);
 }
 
 void AMultiplayerGameStateBase::PlayerHit()
@@ -134,5 +136,25 @@ FName AMultiplayerGameStateBase::GetRandomName()
 	AvailableNames.RemoveAt(RandInt);
 
 	return SelectedName;
+}
+
+void AMultiplayerGameStateBase::SendMessage(AGameplayPlayerState* PlayerState, const FString& Message)
+{
+	Server_SendMessage(PlayerState, Message);
+}
+
+void AMultiplayerGameStateBase::Server_SendMessage_Implementation(AGameplayPlayerState* PlayerState,
+	const FString& Message)
+{
+	ChatUsers.Add(PlayerState);
+	ChatMessages.Add(Message);
+	
+	Multi_SendMessage(PlayerState, Message);
+}
+
+void AMultiplayerGameStateBase::Multi_SendMessage_Implementation(AGameplayPlayerState* PlayerState,
+	const FString& Message)
+{
+	OnMessageSentEvent.Broadcast();
 }
 

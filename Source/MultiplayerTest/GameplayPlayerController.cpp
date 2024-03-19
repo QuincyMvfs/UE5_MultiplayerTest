@@ -96,6 +96,12 @@ void AGameplayPlayerController::SetupInputComponent()
 			// Pause Menu
 			EnhancedInputComponent->BindAction(M_TogglePauseMenuInputAction, ETriggerEvent::Started,
 				this, &AGameplayPlayerController::TogglePauseMenu);
+
+			// Chat Menu
+			EnhancedInputComponent->BindAction(M_OpenChatMenuInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::EnableChatMenu);
+			EnhancedInputComponent->BindAction(M_CloseChatMenuInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::DisableChatMenu);
 		}
 	}
 }
@@ -184,11 +190,33 @@ void AGameplayPlayerController::ScoreboardDisable(const FInputActionValue& Value
 void AGameplayPlayerController::TogglePauseMenu(const FInputActionValue& Value)
 {
 	M_IsPaused = !M_IsPaused;
-	if (M_IsPaused)
+	
+	if (M_IsPaused) { ToggleInputMode(M_PauseMenuWidget, true); }
+	else { ToggleInputMode(nullptr, false); }
+}
+
+void AGameplayPlayerController::EnableChatMenu(const FInputActionValue& Value)
+{
+	if (M_IsPaused) return;
+
+	OnChatOpenedEvent.Broadcast();
+	ToggleInputMode(M_ChatMenuWidget, true);
+}
+
+void AGameplayPlayerController::DisableChatMenu(const FInputActionValue& Value)
+{
+	ToggleInputMode(nullptr, false);
+}
+
+void AGameplayPlayerController::ToggleInputMode(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame)
+{
+	if (PauseGame && WidgetToCreate)
 	{
 		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
+
+		M_IsPaused = true;
 		
-		M_CreatedWidget = CreateWidget<UUserWidget>(this, M_PauseMenuWidget);
+		M_CreatedWidget = CreateWidget<UUserWidget>(this, WidgetToCreate);
 		if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
 
 		const FInputModeGameAndUI PauseInputMode;
@@ -197,6 +225,8 @@ void AGameplayPlayerController::TogglePauseMenu(const FInputActionValue& Value)
 	}
 	else
 	{
+		M_IsPaused = false;
+
 		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
 		
 		const FInputModeGameOnly GameInputMode;
