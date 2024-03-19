@@ -64,12 +64,12 @@ void ABaseZombieAICharacter::Multi_AIAttack_Implementation()
 
 void ABaseZombieAICharacter::Dead(AActor* Killed, AActor* Killer)
 {
-	if (IsLocallyControlled()) { Server_Dead_Implementation(Killed, Killer); }
+	if (IsLocallyControlled()) { Server_Dead(Killed, Killer); }
+	else { Multi_Dead(Killed, Killer); }
 }
 
 void ABaseZombieAICharacter::Server_Dead_Implementation(AActor* Killed, AActor* Killer)
 {
-	M_CapsuleComponent->SetCollisionProfileName("DeadPlayer");
 	if (APawn* KillerPawn = Cast<APawn>(Killer))
 	{
 		if (AGameplayPlayerState* KPS = KillerPawn->GetPlayerState<AGameplayPlayerState>())
@@ -77,7 +77,13 @@ void ABaseZombieAICharacter::Server_Dead_Implementation(AActor* Killed, AActor* 
 			KPS->PlayerGotKill();
 		}
 	}
+	
+	Multi_Dead_Implementation(Killed, Killer);
+}
 
+void ABaseZombieAICharacter::Multi_Dead_Implementation(AActor* Killed, AActor* Killer)
+{
+	M_CapsuleComponent->SetCollisionProfileName("DeadPlayer");
 }
 
 

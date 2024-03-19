@@ -10,7 +10,10 @@
 
 class AGameplayPlayerState;
 class AGameplayActor;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerCreated, AGameplayPlayerState*, PlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerJoined, AGameplayPlayerState*, PlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerLeft, AGameplayPlayerState*, PlayerState);
 
 UCLASS()
 class MULTIPLAYERTEST_API AMultiplayerGameStateBase : public AGameStateBase
@@ -24,6 +27,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerCreated OnPlayerCreatedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerJoined OnPlayerJoinedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerLeft OnPlayerLeftEvent;
 	
 	void PlayerHit();
 
@@ -49,6 +58,14 @@ public:
 	void Multi_PlayerJoined_Implementation(AGameplayPlayerState* PlayerState);
 
 	void PlayerLeft(AGameplayPlayerState* PlayerState);
+
+	UFUNCTION(Server, Reliable)
+	void Server_PlayerLeft(AGameplayPlayerState* PlayerState);
+	void Server_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayerLeft(AGameplayPlayerState* PlayerState);
+	void Multi_PlayerLeft_Implementation(AGameplayPlayerState* PlayerState);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FLinearColor SelectColor();

@@ -9,6 +9,7 @@
 #include "MultiplayerTestGameModeBase.h"
 #include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
+#include "Blueprint/UserWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "Net/UnrealNetwork.h"
 
@@ -23,6 +24,8 @@ void AGameplayPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 void AGameplayPlayerController::BeginPlay()
 {
+	Super::BeginPlay();
+	
 	M_GameInstanceRef = Cast<UTheBossGameInstance>(GetGameInstance());
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -30,6 +33,7 @@ void AGameplayPlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(M_MovementMappingContext, 0);
 		Subsystem->AddMappingContext(M_CombatMappingContext, 1);
+		Subsystem->AddMappingContext(M_UIMappingContext, 2);
 	}
 	
 	SetupInputComponent();
@@ -46,30 +50,52 @@ void AGameplayPlayerController::SetupInputComponent()
 			M_InputSet = true;
 			
 			// Movement
-			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Move);
-			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Look);
+			EnhancedInputComponent->BindAction(M_MovementInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Move);
+			EnhancedInputComponent->BindAction(M_LookInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Look);
 
 			// Jumping
-			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Jump);
+			EnhancedInputComponent->BindAction(M_JumpInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Jump);
 
 			// Crouching
-			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Crouch);
-			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Crouch);
+			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Crouch);
+			EnhancedInputComponent->BindAction(M_CrouchInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Crouch);
 
 			// Sprinting
-			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Run);
-			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Run);
+			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Run);
+			EnhancedInputComponent->BindAction(M_SprintInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Run);
 
 			// Shooting
-			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Triggered, this, &AGameplayPlayerController::Shoot);
-			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Shoot);
+			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Triggered,
+				this, &AGameplayPlayerController::Shoot);
+			EnhancedInputComponent->BindAction(M_ShootInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Shoot);
 			
 			// Aiming
-			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Aim);
-			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed, this, &AGameplayPlayerController::Aim);
+			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Aim);
+			EnhancedInputComponent->BindAction(M_AimInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::Aim);
 
 			// Reloading
-			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started, this, &AGameplayPlayerController::Reload);
+			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Reload);
+
+			// Scoreboard
+			EnhancedInputComponent->BindAction(M_ToggleScoreboardInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::ScoreboardEnable);
+			EnhancedInputComponent->BindAction(M_ToggleScoreboardInputAction, ETriggerEvent::Completed,
+				this, &AGameplayPlayerController::ScoreboardDisable);
+
+			// Pause Menu
+			EnhancedInputComponent->BindAction(M_TogglePauseMenuInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::TogglePauseMenu);
 		}
 	}
 }
@@ -78,7 +104,7 @@ void AGameplayPlayerController::Move(const FInputActionValue& Value)
 {
 	M_MovementVector = Value.Get<FVector2d>();
 
-	if (M_PossessedPawn)
+	if (M_PossessedPawn && !M_IsPaused)
 	{
 		M_PossessedPawn->SetPlayerMovementVector(M_MovementVector);
 		M_PossessedPawn->AddMovementInput(M_PossessedPawn->GetActorForwardVector(), M_MovementVector.Y);
@@ -88,14 +114,14 @@ void AGameplayPlayerController::Move(const FInputActionValue& Value)
 
 void AGameplayPlayerController::Jump(const FInputActionValue& Value)
 {
-	if (M_PossessedPawn) M_PossessedPawn->TryJump();
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->TryJump();
 }
 
 void AGameplayPlayerController::Look(const FInputActionValue& Value)
 {
 	const FVector2d LookAxisVector = Value.Get<FVector2d>();
 
-	if (M_PossessedPawn && M_PossessedPawn->M_CurrentState != EMovementStates::Dead)
+	if (M_PossessedPawn && M_PossessedPawn->M_CurrentState != EMovementStates::Dead && !M_IsPaused)
 	{
 		if (M_PossessedPawn->M_IsAiming && M_GameInstanceRef)
 		{
@@ -113,28 +139,68 @@ void AGameplayPlayerController::Look(const FInputActionValue& Value)
 void AGameplayPlayerController::Crouch(const FInputActionValue& Value)
 {
 	const bool isCrouching = Value.Get<bool>();
-	if (M_PossessedPawn) M_PossessedPawn->SetCrouching(isCrouching);
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->SetCrouching(isCrouching);
 }
 
 void AGameplayPlayerController::Run(const FInputActionValue& Value)
 {
 	const bool isRunning = Value.Get<bool>();
-	if (M_PossessedPawn) M_PossessedPawn->SetRunning(isRunning);
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->SetRunning(isRunning);
 }
 
 void AGameplayPlayerController::Shoot(const FInputActionValue& Value)
 {
 	const bool isShooting = Value.Get<bool>();
-	if (M_PossessedPawn) M_PossessedPawn->SetShooting(isShooting);
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->SetShooting(isShooting);
 }
 
 void AGameplayPlayerController::Aim(const FInputActionValue& Value)
 {
 	const bool isAiming = Value.Get<bool>();
-	if (M_PossessedPawn) M_PossessedPawn->SetAiming(isAiming);
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->SetAiming(isAiming);
 }
 
 void AGameplayPlayerController::Reload(const FInputActionValue& Value)
 {
-	if (M_PossessedPawn) M_PossessedPawn->Reload();
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->Reload();
+}
+
+void AGameplayPlayerController::ScoreboardEnable(const FInputActionValue& Value)
+{
+	if (!M_IsPaused)
+	{
+		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
+		
+		M_CreatedWidget = CreateWidget<UUserWidget>(this, M_ScoreboardWidget);
+		if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
+	}
+}
+
+void AGameplayPlayerController::ScoreboardDisable(const FInputActionValue& Value)
+{
+	if (M_CreatedWidget && !M_IsPaused) M_CreatedWidget->RemoveFromParent();
+}
+
+void AGameplayPlayerController::TogglePauseMenu(const FInputActionValue& Value)
+{
+	M_IsPaused = !M_IsPaused;
+	if (M_IsPaused)
+	{
+		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
+		
+		M_CreatedWidget = CreateWidget<UUserWidget>(this, M_PauseMenuWidget);
+		if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
+
+		const FInputModeGameAndUI PauseInputMode;
+		SetInputMode(PauseInputMode);
+		bShowMouseCursor = true;
+	}
+	else
+	{
+		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
+		
+		const FInputModeGameOnly GameInputMode;
+		SetInputMode(GameInputMode);
+		bShowMouseCursor = false;
+	}
 }
