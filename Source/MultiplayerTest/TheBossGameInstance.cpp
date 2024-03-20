@@ -58,6 +58,8 @@ void UTheBossGameInstance::OnFindSessionComplete(bool Succeeded)
 			ArrayIndex++;
 			if (!SearchResult.IsValid()) continue;
 
+			FOnlineSessionSettings SessionSettings = SearchResult.Session.SessionSettings;
+
 			FServerInfo Info;
 			FString ServerName = "Empty Server Name";
 			FString HostName = "Empty Server Name";
