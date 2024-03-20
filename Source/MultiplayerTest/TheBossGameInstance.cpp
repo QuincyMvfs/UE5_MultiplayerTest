@@ -132,8 +132,9 @@ void UTheBossGameInstance::CreateServer(FCreateServerInfo InputServerInfo)
 	SessionSettings.NumPublicConnections = InputServerInfo.MaxPlayers;
 	SessionSettings.NumPrivateConnections  = InputServerInfo.MaxPlayers;
 
-	SessionSettings.Set(M_SessionName, InputServerInfo.ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	// SessionSettings.Set(FName("SERVER_HOSTNAME_KEY"), HostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	UE_LOG(LogTemp, Warning, TEXT("Server Name: %s"), *InputServerInfo.ServerName);
+	SessionSettings.Set(FName("SERVER_NAME_KEY"), InputServerInfo.ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	SessionSettings.Set(FName("SERVER_HOSTNAME_KEY"), InputServerInfo.ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	
 	SessionInterface->CreateSession(0, M_SessionName, SessionSettings);
 	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attempt Session Create"));
