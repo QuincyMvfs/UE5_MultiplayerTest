@@ -44,12 +44,12 @@ public:
 	virtual void ShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	
 	UFUNCTION(Server, Reliable)
-	void Server_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
-	void Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	virtual void Server_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	virtual void Server_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multi_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
-	void Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	virtual void Multi_OnShootWeapon(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
+	virtual void Multi_OnShootWeapon_Implementation(UCameraComponent* cameraComponent, AActor* shooter, FVector muzzleLocation);
 	// END OF SHOOTING FUNCTIONS
 	
 	// RELOADING CLIENT + SERVER
@@ -57,26 +57,26 @@ public:
 	virtual void Reload();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_TryReload();
-	bool Server_TryReload_Validate();
-	void Server_TryReload_Implementation();
+	virtual void Server_TryReload();
+	virtual bool Server_TryReload_Validate();
+	virtual void Server_TryReload_Implementation();
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	void Multi_TryReload();
-	bool Multi_TryReload_Validate();
-	void Multi_TryReload_Implementation();
+	virtual void Multi_TryReload();
+	virtual bool Multi_TryReload_Validate();
+	virtual void Multi_TryReload_Implementation();
 
-	void DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual void DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
 	
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
-	bool Server_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
-	void Server_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual void Server_DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual bool Server_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual void Server_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	void Multi_DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
-	bool Multi_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
-	void Multi_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual void Multi_DealDamage(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual bool Multi_DealDamage_Validate(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
+	virtual void Multi_DealDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, UHealthComponent* HitHealth, FName HitBone);
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")

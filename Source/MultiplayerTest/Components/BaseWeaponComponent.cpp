@@ -26,6 +26,9 @@ UBaseWeaponComponent::UBaseWeaponComponent()
 void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	m_currentMagazine = M_MaxMagazineCapacity;
+	M_IsReloading = false;
+
 	m_pawnOwner = Cast<APawn>(GetOwner());
 }
 
@@ -190,7 +193,7 @@ void UBaseWeaponComponent::TryReload()
 		FTimerHandle ReloadTimer;
 		GetWorld()->GetTimerManager().SetTimer(
 			ReloadTimer, this, &UBaseWeaponComponent::Reload, M_ReloadDuration);
-
+		
 		if (!GetOwner()->HasAuthority()) { Server_TryReload(); }
 		else { Multi_TryReload(); }
 	}
@@ -215,5 +218,10 @@ void UBaseWeaponComponent::Reload()
 {
 	M_IsReloading = false;
 	m_currentMagazine = M_MaxMagazineCapacity;
+
+	if (m_pawnOwner->IsLocallyControlled())
+	{
+		m_nextTimeToShoot = GetWorld()->GetTimeSeconds() + 0.1f;
+	}
 }
 

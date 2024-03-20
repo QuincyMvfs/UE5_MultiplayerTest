@@ -25,6 +25,7 @@ class MULTIPLAYERTEST_API AGameplayActor : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
 	// Viewport Components
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UCapsuleComponent* M_PlayerCapsuleComponent;
@@ -76,7 +77,7 @@ public:
 
 	// Sets animation variables in the players Animation Blueprint
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bIsReloading, bool& bIsHit,
+	virtual void GetAnimationVariables(bool& bIsFalling, bool& bIsAiming, bool& bIsShooting, bool& bIsReloading, bool& bIsHit,
 	float& CurrentSpeed, FVector& CurrentVelocity, EMovementStates& CurrentState);
 
 	// SETS REPLICATED VARIABLES
@@ -118,15 +119,15 @@ public:
 
 	//* SHOOTING | SERVER + CLIENT
 	UFUNCTION()
-	void SetShooting(bool Value);
+	virtual void SetShooting(bool Value);
 
 	UFUNCTION(Server, Reliable)
-	void Server_SetShooting(bool Value);
-	void Server_SetShooting_Implementation(bool Value);
+	virtual void Server_SetShooting(bool Value);
+	virtual void Server_SetShooting_Implementation(bool Value);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multi_SetShooting(bool Value);
-	void Multi_SetShooting_Implementation(bool Value);
+	virtual void Multi_SetShooting(bool Value);
+	virtual void Multi_SetShooting_Implementation(bool Value);
 
 	//* AIMING | CLIENT + SERVER
 	UFUNCTION()
@@ -156,7 +157,7 @@ public:
 	void Respawn();
 	
 	UFUNCTION()
-	void Reload();
+	virtual void Reload();
 	
 	UFUNCTION()
 	void TryJump();
@@ -195,9 +196,8 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	EMovementStates M_CurrentState;
 	
-private:
+protected:
 	FVector2d m_movementVector;
-	
 	
 	UPROPERTY(Replicated)
 	float m_currentSpeed;
