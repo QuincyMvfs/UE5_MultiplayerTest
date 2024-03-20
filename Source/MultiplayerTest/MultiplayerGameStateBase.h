@@ -130,4 +130,6 @@ public:
 private:
 	void ConstructColours();
 	void ConstructNames();
+
+	int M_MaxChatMessages = 150;
 };

@@ -148,6 +148,12 @@ void AMultiplayerGameStateBase::Server_SendMessage_Implementation(AGameplayPlaye
 {
 	ChatUsers.Add(PlayerState);
 	ChatMessages.Add(Message);
+
+	if (ChatUsers.Num() > M_MaxChatMessages)
+	{
+		ChatUsers.RemoveAt(0);
+		ChatMessages.RemoveAt(0);
+	}
 	
 	Multi_SendMessage(PlayerState, Message);
 }
