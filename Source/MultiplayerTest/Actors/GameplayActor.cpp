@@ -14,6 +14,7 @@
 #include "MultiplayerTest/MultiplayerTestGameModeBase.h"
 #include "MultiplayerTest/Components/BaseWeaponComponent.h"
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
+#include "MultiplayerTest/Components/EnemyHealthDisplay.h"
 #include "MultiplayerTest/Components/HealthComponent.h"
 #include "MultiplayerTest/Components/VFXReplicationComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -50,10 +51,15 @@ AGameplayActor::AGameplayActor()
 	M_WeaponComponent = CreateDefaultSubobject<UBaseWeaponComponent>(TEXT("Weapon"));
 	M_CameraZoomComponent = CreateDefaultSubobject<UCameraZoomComponent>(TEXT("CameraZoomComponent"));
 	M_CameraZoomComponent->SetCameraComponent(M_PlayerCamera, M_CameraSpringArm);
+	
 	M_PlayerHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	M_PlayerHealthComponent->M_Team = ETeams::Humans;
 	M_PlayerHealthComponent->OnKilledEvent.AddDynamic(this, &AGameplayActor::SetDead);
+	
 	M_VFXReplicationComponent = CreateDefaultSubobject<UVFXReplicationComponent>(TEXT("VFXReplicationComponent"));
+	
+	M_EnemyHealthDisplayComponent = CreateDefaultSubobject<UEnemyHealthDisplay>(TEXT("EnemyHealthDisplayComponent"));
+	M_EnemyHealthDisplayComponent->M_CameraComponent = M_PlayerCamera;
 }
 //*
 

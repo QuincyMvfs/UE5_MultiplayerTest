@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UEnemyHealthDisplay;
 class UVFXReplicationComponent;
 class UTeamInfoComponent;
 class UWidgetComponent;
@@ -60,6 +61,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UVFXReplicationComponent* M_VFXReplicationComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	UEnemyHealthDisplay* M_EnemyHealthDisplayComponent;
 	//*
 	
 public:

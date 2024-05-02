@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayPlayerController.generated.h"
 
+class UHealthComponent;
 class UTheBossGameInstance;
 class UInputAction;
 class UInputMappingContext;
@@ -128,6 +129,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void DisableChatMenu(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void DisplayEnemyHealth(FText Name, UHealthComponent* HealthComponent);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveEnemyHealth();
 	
 public:
 	FVector2d M_MovementVector;

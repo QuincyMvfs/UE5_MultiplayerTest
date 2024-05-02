@@ -208,6 +208,16 @@ void AGameplayPlayerController::DisableChatMenu(const FInputActionValue& Value)
 	ToggleInputMode(nullptr, false);
 }
 
+void AGameplayPlayerController::DisplayEnemyHealth(FText Name, UHealthComponent* HealthComponent)
+{
+	
+}
+
+void AGameplayPlayerController::RemoveEnemyHealth()
+{
+	
+}
+
 void AGameplayPlayerController::ToggleInputMode(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame)
 {
 	if (PauseGame && WidgetToCreate)

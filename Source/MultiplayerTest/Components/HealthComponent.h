@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+enum class EEnemyTypes : uint8;
 class AMultiplayerGameStateBase;
 enum class ETeams : uint8;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float, HealthPercent, AActor*, Damaged);
@@ -28,22 +29,36 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
+	//* Delegates
 	UPROPERTY(BlueprintAssignable)
 		FOnDamaged OnDamagedEvent;
 	UPROPERTY(BlueprintAssignable)
 		FOnStunComplete OnStunCompletedEvent;
 	UPROPERTY(BlueprintAssignable)
 		FOnKilled OnKilledEvent;
+	//*
 
+	//* EDITABLE VARIBLES
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FName, float> M_BoneMultiplier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float M_MaxHealth = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float M_HitDuration = 0.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	ETeams M_Team;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	EEnemyTypes M_EntityType;
+	//*
 	
+public:
+	//* FUNCTIONS
 	UFUNCTION(BlueprintCallable, Category = Health)
 	virtual void TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
-
-	// UFUNCTION(Server, Reliable)
-	// void Server_TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
-	// void Server_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
 	
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_TakeDamage(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
@@ -66,16 +81,9 @@ public:
 	void Server_SendDamageDealtValues(AActor* Instigator, float Amount);
 	void Server_SendDamageDealtValues_Implementation(AActor* Instigator, float Amount);
 
+	float GetCurrentHealth();
+	//*
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float M_MaxHealth = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float M_HitDuration = 0.2f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	ETeams M_Team;
-
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool M_IsHit = false;
 

@@ -15,23 +15,21 @@ UEnemyHealthDisplay::UEnemyHealthDisplay()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UEnemyHealthDisplay::BeginPlay() { Super::BeginPlay(); }
-
-
-// Called every frame
-void UEnemyHealthDisplay::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UEnemyHealthDisplay::BeginPlay()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::BeginPlay();
 
-	CheckForEnemies();
+	FTimerHandle CheckForEnemiesTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+			CheckForEnemiesTimer, this, &UEnemyHealthDisplay::CheckForEnemies, 0.5f, true);
 }
 
 void UEnemyHealthDisplay::CheckForEnemies()
 {
-	if (m_cameraComponent)
+	if (M_CameraComponent)
 	{
-		const FVector startPoint = m_cameraComponent->GetComponentLocation();
-		const FVector endPoint = startPoint + (m_cameraComponent->GetForwardVector() * m_rayLength);
+		const FVector startPoint = M_CameraComponent->GetComponentLocation();
+		const FVector endPoint = startPoint + (M_CameraComponent->GetForwardVector() * m_rayLength);
 		
 		FHitResult hitResult;
 		if (bool didHitObject = UKismetSystemLibrary::LineTraceSingle(
@@ -42,21 +40,32 @@ void UEnemyHealthDisplay::CheckForEnemies()
 			{
 				if (UHealthComponent* Health = HitActor->FindComponentByClass<UHealthComponent>())
 				{
-					M_CanSeeEnemy = true;
+					DisplayHealthBar(HitActor, Health);
 				}
-				else { M_CanSeeEnemy = false; }
+				else { RemoveHealthBar(); }
 			}
-			else { M_CanSeeEnemy = false; }
+			else { RemoveHealthBar(); }
 		}
-		else { M_CanSeeEnemy = false; }
+		else { RemoveHealthBar(); }
 	}
 }
 
-void UEnemyHealthDisplay::DisplayHealthBar()
+void UEnemyHealthDisplay::DisplayHealthBar(AActor* SpottedEntity, UHealthComponent* HealthComponent)
 {
+	if (HealthComponent->M_IsDead) return;
+	
+	M_CanSeeEnemy = true;
+	M_SpottedEnemy = SpottedEntity;
+
+	const FString EnumName = UEnum::GetValueAsString(HealthComponent->M_EntityType);
+	const FText EnumText = FText::FromString(EnumName);
+	OnEnemySpottedEvent.Broadcast(EnumText, HealthComponent);
 }
 
 void UEnemyHealthDisplay::RemoveHealthBar()
 {
+	M_SpottedEnemy = nullptr;
+	M_CanSeeEnemy = false;
+	OnNoEnemySpottedEvent.Broadcast();
 }
 
