@@ -7,7 +7,11 @@
 #include "EnemyHealthDisplay.generated.h"
 
 
+class UHealthComponent;
 class UCameraComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEnemySpotted, FText, EnemyName, UHealthComponent*, HealthComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNoEnemySpotted);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIPLAYERTEST_API UEnemyHealthDisplay : public UActorComponent
@@ -23,20 +27,26 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	virtual void CheckForEnemies();
-	virtual void DisplayHealthBar();
+	virtual void DisplayHealthBar(AActor* SpottedEntity, UHealthComponent* HealthComponent);
 	virtual void RemoveHealthBar();
 
+	UPROPERTY(BlueprintAssignable)
+	FEnemySpotted OnEnemySpottedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FNoEnemySpotted OnNoEnemySpottedEvent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool M_CanSeeEnemy;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AActor* M_SpottedEnemy;
+
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* M_CameraComponent;
 	
 private:
-	UCameraComponent* m_cameraComponent;
 	const float m_rayLength = 10000;
+	const FString& m_enumName = "EEnemyTypes::";
 };

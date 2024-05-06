@@ -142,3 +142,8 @@ void UHealthComponent::Server_SendDamageDealtValues_Implementation(AActor* Insti
 	}
 }
 
+float UHealthComponent::GetCurrentHealth()
+{
+	return m_currentHealth;
+}
+
