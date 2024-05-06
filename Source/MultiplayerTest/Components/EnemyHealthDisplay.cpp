@@ -6,6 +6,10 @@
 #include "HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MultiplayerTest/GameplayPlayerState.h"
+#include "MultiplayerTest/Actors/GameplayActor.h"
+#include "MultiplayerTest/EnumClasses/EEnemyTypes.h"
+#include "String/RemoveFrom.h"
 
 // Sets default values for this component's properties
 UEnemyHealthDisplay::UEnemyHealthDisplay()
@@ -56,9 +60,20 @@ void UEnemyHealthDisplay::DisplayHealthBar(AActor* SpottedEntity, UHealthCompone
 	
 	M_CanSeeEnemy = true;
 	M_SpottedEnemy = SpottedEntity;
-
-	const FString EnumName = UEnum::GetValueAsString(HealthComponent->M_EntityType);
-	const FText EnumText = FText::FromString(EnumName);
+	FText EnumText;
+	
+	if (HealthComponent->M_EntityType == EEnemyTypes::Player)
+	{
+		const AGameplayActor* Player = Cast<AGameplayActor>(SpottedEntity);
+		AGameplayPlayerState* PS = Cast<AGameplayPlayerState>(Player->GetPlayerState());
+		EnumText = FText::FromName(PS->M_PlayerName);
+	}
+	else
+	{
+		FString EnumName = UEnum::GetValueAsString(HealthComponent->M_EntityType);
+		EnumName = EnumName.RightChop(m_enumName.Len());
+		EnumText = FText::FromString(EnumName);
+	}
 	OnEnemySpottedEvent.Broadcast(EnumText, HealthComponent);
 }
 

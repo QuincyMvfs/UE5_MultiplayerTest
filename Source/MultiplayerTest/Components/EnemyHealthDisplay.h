@@ -48,4 +48,5 @@ public:
 	
 private:
 	const float m_rayLength = 10000;
+	const FString& m_enumName = "EEnemyTypes::";
 };
