@@ -66,6 +66,13 @@ public:
 	void Multi_TakeDamage_Implementation(float Amount, AActor* Instigator, AActor* Victim, FName HitBone);
 
 	float GetMultipliedDamage(float BaseDamage, FName HitBone);
+
+	UFUNCTION(BlueprintCallable, Category = Health)
+	virtual void Heal(float Amount, AActor* Instigator, AActor* Victim);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_Heal(float Amount, AActor* Instigator, AActor* Victim);
+	void Multi_Heal_Implementation(float Amount, AActor* Instigator, AActor* Victim);
 	
 	void SetIsHit();
 	void SetIsNotHit();

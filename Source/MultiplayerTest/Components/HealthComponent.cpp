@@ -88,6 +88,16 @@ float UHealthComponent::GetMultipliedDamage(float BaseDamage, FName HitBone)
 	return BaseDamage;
 }
 
+void UHealthComponent::Heal(float Amount, AActor* Instigator, AActor* Victim)
+{
+	if (GetOwner()->HasAuthority()) { Multi_Heal(Amount, Instigator, Victim); }
+}
+
+void UHealthComponent::Multi_Heal_Implementation(float Amount, AActor* Instigator, AActor* Victim)
+{
+	m_currentHealth += Amount;
+}
+
 void UHealthComponent::SetIsHit()
 {
 	M_IsHit = true;
