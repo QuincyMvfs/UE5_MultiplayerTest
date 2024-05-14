@@ -16,7 +16,9 @@
 #include "MultiplayerTest/Components/CameraZoomComponent.h"
 #include "MultiplayerTest/Components/EnemyHealthDisplay.h"
 #include "MultiplayerTest/Components/HealthComponent.h"
+#include "MultiplayerTest/Components/InventoryComponent.h"
 #include "MultiplayerTest/Components/VFXReplicationComponent.h"
+#include "MultiplayerTest/Items/Item.h"
 #include "Net/UnrealNetwork.h"
 
 //* Sets default values
@@ -60,6 +62,8 @@ AGameplayActor::AGameplayActor()
 	
 	M_EnemyHealthDisplayComponent = CreateDefaultSubobject<UEnemyHealthDisplay>(TEXT("EnemyHealthDisplayComponent"));
 	M_EnemyHealthDisplayComponent->M_CameraComponent = M_PlayerCamera;
+
+	M_InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 //*
 
@@ -377,6 +381,15 @@ void AGameplayActor::Server_SetDead_Implementation(AActor* Killed, AActor* Kille
 				KPS->PlayerGotKill();
 			}
 		}
+	}
+}
+
+void AGameplayActor::UseItem(UItem* Item)
+{
+	if (Item)
+	{
+		Item->Use(this);
+		Item->OnUse(this);
 	}
 }
 

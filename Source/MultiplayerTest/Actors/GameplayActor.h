@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "GameplayActor.generated.h"
 
+class UInventoryComponent;
+class UItem;
 class UEnemyHealthDisplay;
 class UVFXReplicationComponent;
 class UTeamInfoComponent;
@@ -64,6 +66,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	UEnemyHealthDisplay* M_EnemyHealthDisplayComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	UInventoryComponent* M_InventoryComponent;
 	//*
 	
 public:
@@ -152,10 +157,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_SetDead(AActor* Killed, AActor* Killer);
 	void Server_SetDead_Implementation(AActor* Killed, AActor* Killer);
-	//
-	// UFUNCTION(NetMulticast, Reliable)
-	// void Multi_SetDead(AActor* Killer);
-	// void Multi_SetDead_Implementation(AActor* Killer);
+
+	UFUNCTION()
+	void UseItem(UItem* Item);
 
 	UFUNCTION()
 	void Respawn();
