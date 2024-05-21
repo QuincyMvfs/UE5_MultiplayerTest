@@ -21,6 +21,9 @@ public:
 
 	UPROPERTY()
 	UInventoryComponent* OwningInventory;
+
+	UPROPERTY(Transient)
+	UWorld* World;
 	
 	virtual void Use(AGameplayActor* OwningCharacter) PURE_VIRTUAL(UItem, );
 
