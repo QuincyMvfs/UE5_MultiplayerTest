@@ -102,6 +102,10 @@ void AGameplayPlayerController::SetupInputComponent()
 				this, &AGameplayPlayerController::EnableChatMenu);
 			EnhancedInputComponent->BindAction(M_CloseChatMenuInputAction, ETriggerEvent::Started,
 				this, &AGameplayPlayerController::DisableChatMenu);
+
+			// Inventory Menu
+			EnhancedInputComponent->BindAction(M_ToggleInventoryInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::ToggleInventoryMenu);
 		}
 	}
 }
@@ -171,6 +175,7 @@ void AGameplayPlayerController::Reload(const FInputActionValue& Value)
 	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->Reload();
 }
 
+//* Scoreboard
 void AGameplayPlayerController::ScoreboardEnable(const FInputActionValue& Value)
 {
 	if (!M_IsPaused)
@@ -186,49 +191,65 @@ void AGameplayPlayerController::ScoreboardDisable(const FInputActionValue& Value
 {
 	if (M_CreatedWidget && !M_IsPaused) M_CreatedWidget->RemoveFromParent();
 }
+//*
 
+//* Pause
 void AGameplayPlayerController::TogglePauseMenu(const FInputActionValue& Value)
 {
 	M_IsPaused = !M_IsPaused;
 	
-	if (M_IsPaused) { ToggleInputMode(M_PauseMenuWidget, true); }
-	else { ToggleInputMode(nullptr, false); }
+	if (M_IsPaused) { ToggleInputModePause(M_PauseMenuWidget, true); }
+	else { ToggleInputModePause(nullptr, false); }
 }
+//*
 
+//* Chat
 void AGameplayPlayerController::EnableChatMenu(const FInputActionValue& Value)
 {
 	if (M_IsPaused) return;
 
 	OnChatOpenedEvent.Broadcast();
-	ToggleInputMode(M_ChatMenuWidget, true);
+	ToggleInputModePause(M_ChatMenuWidget, true);
 }
 
 void AGameplayPlayerController::DisableChatMenu(const FInputActionValue& Value)
 {
-	ToggleInputMode(nullptr, false);
+	ToggleInputModePause(nullptr, false);
 }
+//*
 
-void AGameplayPlayerController::DisplayEnemyHealth(FText Name, UHealthComponent* HealthComponent)
+//* Inventory
+void AGameplayPlayerController::ToggleInventoryMenu(const FInputActionValue& Value)
 {
+	if (M_IsPaused) return;
 	
-}
-
-void AGameplayPlayerController::RemoveEnemyHealth()
-{
+	if (!M_IsInventoryOpen)
+	{
+		OnInventoryToggledEvent.Broadcast(true);
+		ToggleInputMode(true);
+	}
+	else
+	{
+		OnInventoryToggledEvent.Broadcast(false);
+		ToggleInputMode(false);
+	}
 	
+	M_IsInventoryOpen = !M_IsInventoryOpen;
+	UE_LOG(LogTemp, Warning, TEXT("INVENTORY"));
 }
+//*
 
-void AGameplayPlayerController::ToggleInputMode(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame)
+void AGameplayPlayerController::ToggleInputModePause(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame)
 {
 	if (PauseGame && WidgetToCreate)
 	{
-		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
-
 		M_IsPaused = true;
+		
+		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
 		
 		M_CreatedWidget = CreateWidget<UUserWidget>(this, WidgetToCreate);
 		if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
-
+		
 		const FInputModeGameAndUI PauseInputMode;
 		SetInputMode(PauseInputMode);
 		bShowMouseCursor = true;
@@ -244,3 +265,27 @@ void AGameplayPlayerController::ToggleInputMode(TSubclassOf<UUserWidget> WidgetT
 		bShowMouseCursor = false;
 	}
 }
+
+void AGameplayPlayerController::ToggleInputMode(bool IsUIMode)
+{
+	if (IsUIMode)
+	{
+		const FInputModeGameAndUI PauseInputMode;
+		SetInputMode(PauseInputMode);
+		bShowMouseCursor = true;
+	}
+	else
+	{
+		const FInputModeGameOnly GameInputMode;
+		SetInputMode(GameInputMode);
+		bShowMouseCursor = false;
+	}
+}
+
+// void AGameplayPlayerController::CreateCustomWidget(TSubclassOf<UUserWidget> WidgetToCreate)
+// {
+// 	if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
+// 		
+// 	M_CreatedWidget = CreateWidget<UUserWidget>(this, WidgetToCreate);
+// 	if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
+// }

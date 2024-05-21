@@ -158,7 +158,7 @@ public:
 	void Server_SetDead(AActor* Killed, AActor* Killer);
 	void Server_SetDead_Implementation(AActor* Killed, AActor* Killer);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void UseItem(UItem* Item);
 
 	UFUNCTION()

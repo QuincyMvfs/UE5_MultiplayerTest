@@ -95,7 +95,15 @@ void UHealthComponent::Heal(float Amount, AActor* Instigator, AActor* Victim)
 
 void UHealthComponent::Multi_Heal_Implementation(float Amount, AActor* Instigator, AActor* Victim)
 {
-	m_currentHealth += Amount;
+	if (M_IsDead) return;
+	
+	if (m_currentHealth > 0)
+	{
+		m_currentHealth -= Amount;
+		m_currentHealth = FMath::Clamp(m_currentHealth, 0.0f, M_MaxHealth);
+		
+		OnDamagedEvent.Broadcast(m_currentHealth / M_MaxHealth, Victim);
+	}
 }
 
 void UHealthComponent::SetIsHit()

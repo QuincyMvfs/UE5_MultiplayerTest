@@ -25,7 +25,7 @@ public:
 	UPROPERTY(Transient)
 	UWorld* World;
 	
-	virtual void Use(AGameplayActor* OwningCharacter) PURE_VIRTUAL(UItem, );
+	virtual void Use(AGameplayActor* OwningCharacter);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnUse(AGameplayActor* OwningCharacter);

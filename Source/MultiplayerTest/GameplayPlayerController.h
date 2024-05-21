@@ -16,6 +16,7 @@ class AGameplayActor;
  */
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChatOpened);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryToggled, bool, InventoryToggledOn);
 
 UCLASS()
 class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
@@ -25,6 +26,10 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 	// DELEGATES
 	UPROPERTY(BlueprintAssignable)
 	FOnChatOpened OnChatOpenedEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInventoryToggled OnInventoryToggledEvent;
+
 	
 	//* INPUT MAPPING CONTEXTS
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
@@ -76,6 +81,9 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_CloseChatMenuInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_ToggleInventoryInputAction;
 	//*
 		
 public:
@@ -131,10 +139,10 @@ public:
 	void DisableChatMenu(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
-	void DisplayEnemyHealth(FText Name, UHealthComponent* HealthComponent);
+	void ToggleInventoryMenu(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveEnemyHealth();
+	void ToggleInputMode(bool IsUIMode);
 	
 public:
 	FVector2d M_MovementVector;
@@ -160,8 +168,11 @@ public:
 
 	bool M_IsPaused = false;
 
-private:
-	void ToggleInputMode(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool M_IsInventoryOpen = false;
 	
+private:
+	void ToggleInputModePause(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame);
+
 };
 

@@ -3,3 +3,7 @@
 
 #include "Item.h"
 
+void UItem::Use(AGameplayActor* OwningCharacter)
+{
+	
+}

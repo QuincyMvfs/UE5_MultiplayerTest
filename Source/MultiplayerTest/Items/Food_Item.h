@@ -14,7 +14,9 @@ UCLASS()
 class MULTIPLAYERTEST_API UFood_Item : public UItem
 {
 	GENERATED_BODY()
-
+	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float HealAmount = 25.0f;
 	
 	virtual void Use(AGameplayActor* OwningCharacter) override;
