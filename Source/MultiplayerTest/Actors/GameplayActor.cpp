@@ -386,6 +386,11 @@ void AGameplayActor::Server_SetDead_Implementation(AActor* Killed, AActor* Kille
 
 void AGameplayActor::UseItem(UItem* Item)
 {
+	Server_UseItem(Item);
+}
+
+void AGameplayActor::Server_UseItem_Implementation(UItem* Item)
+{
 	if (Item)
 	{
 		Item->Use(this);

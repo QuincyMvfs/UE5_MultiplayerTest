@@ -22,19 +22,28 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	
-	bool AddItem(UItem* ItemToAdd);
-	bool RemoveItem(UItem* ItemToRemove);
+	void AddItem(UItem* ItemToAdd);
 
-	UPROPERTY(EditDefaultsOnly, Instanced, Replicated)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_AddItem(UItem* ItemToAdd);
+	void Multi_AddItem_Implementation(UItem* ItemToAdd);
+	
+	void RemoveItem(UItem* ItemToRemove);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_RemoveItem(UItem* ItemToRemove);
+	void Multi_RemoveItem_Implementation(UItem* ItemToRemove);
+
+	UPROPERTY(EditDefaultsOnly, Instanced)
 	TArray<UItem*> M_DefaultItems;
 
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Inventory", Replicated)
 	int32 M_Capacity;
 
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", Replicated)
 	TArray<UItem*> M_Items;
 
 protected:

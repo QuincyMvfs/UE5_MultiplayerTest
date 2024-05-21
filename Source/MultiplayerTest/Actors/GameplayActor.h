@@ -161,6 +161,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UseItem(UItem* Item);
 
+	UFUNCTION(Server, Reliable)
+	void Server_UseItem(UItem* Item);
+	void Server_UseItem_Implementation(UItem* Item);
+
 	UFUNCTION()
 	void Respawn();
 	
