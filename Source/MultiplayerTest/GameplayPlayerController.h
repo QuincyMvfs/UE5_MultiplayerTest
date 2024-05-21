@@ -167,6 +167,7 @@ public:
 	UUserWidget* M_CreatedWidget;
 
 	bool M_IsPaused = false;
+	bool M_DenyInput = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool M_IsInventoryOpen = false;

@@ -196,7 +196,8 @@ void AGameplayPlayerController::ScoreboardDisable(const FInputActionValue& Value
 //* Pause
 void AGameplayPlayerController::TogglePauseMenu(const FInputActionValue& Value)
 {
-	M_IsPaused = !M_IsPaused;
+	if (M_IsInventoryOpen && M_IsPaused) M_IsPaused = false;
+	else { M_IsPaused = !M_IsPaused; }
 	
 	if (M_IsPaused) { ToggleInputModePause(M_PauseMenuWidget, true); }
 	else { ToggleInputModePause(nullptr, false); }
@@ -221,7 +222,7 @@ void AGameplayPlayerController::DisableChatMenu(const FInputActionValue& Value)
 //* Inventory
 void AGameplayPlayerController::ToggleInventoryMenu(const FInputActionValue& Value)
 {
-	if (M_IsPaused) return;
+	if (M_IsPaused && !M_IsInventoryOpen) return;
 	
 	if (!M_IsInventoryOpen)
 	{
@@ -259,6 +260,9 @@ void AGameplayPlayerController::ToggleInputModePause(TSubclassOf<UUserWidget> Wi
 		M_IsPaused = false;
 
 		if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
+
+		OnInventoryToggledEvent.Broadcast(false);
+		M_IsInventoryOpen = false;
 		
 		const FInputModeGameOnly GameInputMode;
 		SetInputMode(GameInputMode);
@@ -270,12 +274,14 @@ void AGameplayPlayerController::ToggleInputMode(bool IsUIMode)
 {
 	if (IsUIMode)
 	{
+		M_IsPaused = true;
 		const FInputModeGameAndUI PauseInputMode;
 		SetInputMode(PauseInputMode);
 		bShowMouseCursor = true;
 	}
 	else
 	{
+		M_IsPaused = false;
 		const FInputModeGameOnly GameInputMode;
 		SetInputMode(GameInputMode);
 		bShowMouseCursor = false;
