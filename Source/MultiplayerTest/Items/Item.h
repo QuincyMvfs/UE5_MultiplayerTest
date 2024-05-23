@@ -19,7 +19,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Items)
 	FItemInfo ItemInfo;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UInventoryComponent* OwningInventory;
 
 	UPROPERTY(Transient)

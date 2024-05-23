@@ -39,12 +39,39 @@ void UInventoryComponent::AddItem(UItem* ItemToAdd)
 void UInventoryComponent::Multi_AddItem_Implementation(UItem* ItemToAdd)
 {
 	if (M_Items.Num() >= M_Capacity || !ItemToAdd) { return; }
-	
-	ItemToAdd->OwningInventory = this;
-	ItemToAdd->World = GetWorld();
-	M_Items.Add(ItemToAdd);
+
+	if (ItemToAdd->ItemInfo.IsStackable)
+	{
+		if (!CanStack(ItemToAdd))
+		{
+			ItemToAdd->OwningInventory = this;
+			ItemToAdd->World = GetWorld();
+			M_Items.Add(ItemToAdd);
+		}
+	}
+	else
+	{
+		ItemToAdd->OwningInventory = this;
+		ItemToAdd->World = GetWorld();
+		M_Items.Add(ItemToAdd);
+	}
 	
 	OnInventoryUpdated.Broadcast();
+}
+
+bool UInventoryComponent::CanStack(UItem* ItemToCheck)
+{
+	for (UItem* item : M_Items)
+	{
+		if (item->ItemInfo.ItemName.ToString() == ItemToCheck->ItemInfo.ItemName.ToString())
+		{
+			item->ItemInfo.Quantity += ItemToCheck->ItemInfo.Quantity;
+			UE_LOG(LogTemp, Warning, TEXT("Contains"));
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void UInventoryComponent::RemoveItem(UItem* ItemToRemove)
