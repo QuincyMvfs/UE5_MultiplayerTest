@@ -17,7 +17,7 @@ public class MultiplayerTest : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"EnhancedInput", "Niagara", "OnlineSubsystem",
-			"OnlineSubsystemNull", "OnlineSubsystemSteam"
+			"OnlineSubsystemNull", "OnlineSubsystemSteam", "Slate", "SlateCore"
 		});
 
 		// Uncomment if you are using Slate UI
