@@ -143,6 +143,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleInputMode(bool IsUIMode);
+
+	UFUNCTION(BlueprintCallable)
+	UUserWidget* GetWidgetUnderCursor();
 	
 public:
 	FVector2d M_MovementVector;

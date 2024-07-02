@@ -10,6 +10,7 @@
 #include "TheBossGameInstance.h"
 #include "Actors/GameplayActor.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Net/UnrealNetwork.h"
 
@@ -288,10 +289,26 @@ void AGameplayPlayerController::ToggleInputMode(bool IsUIMode)
 	}
 }
 
-// void AGameplayPlayerController::CreateCustomWidget(TSubclassOf<UUserWidget> WidgetToCreate)
-// {
-// 	if (M_CreatedWidget) M_CreatedWidget->RemoveFromParent();
-// 		
-// 	M_CreatedWidget = CreateWidget<UUserWidget>(this, WidgetToCreate);
-// 	if (M_CreatedWidget) M_CreatedWidget->AddToViewport();
-// }
+UUserWidget* AGameplayPlayerController::GetWidgetUnderCursor()
+{
+	FVector2D MousePosition;
+	FHitResult HitResult;
+	if (!GetMousePosition(MousePosition.X, MousePosition.Y))
+	{
+		return nullptr;
+	}
+	
+	GetHitResultAtScreenPosition(MousePosition, ECC_Visibility, true, HitResult);
+
+	// Check if the hit result has a valid actor and get the widget component
+	if (HitResult.GetComponent())
+	{
+		UWidgetComponent* WidgetComponent = Cast<UWidgetComponent>(HitResult.GetComponent());
+		if (WidgetComponent)
+		{
+			return Cast<UUserWidget>(WidgetComponent->GetUserWidgetObject());
+		}
+	}
+
+	return nullptr;
+}
