@@ -42,6 +42,13 @@ public:
 	void Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex);
 
 	UFUNCTION(BlueprintCallable)
+	void SwapItem(UItem* PreviousItem, int newIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_SwapItem(UItem* PreviousItem, int newIndex);
+	void Multi_SwapItem_Implementation(UItem* PreviousItem, int newIndex);
+
+	UFUNCTION(BlueprintCallable)
 	void RemoveItem(UItem* ItemToRemove, int ItemIndex);
 	
 	UFUNCTION(NetMulticast, Reliable)

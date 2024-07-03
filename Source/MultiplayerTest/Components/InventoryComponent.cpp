@@ -130,6 +130,26 @@ bool UInventoryComponent::CanStack(UItem* ItemToCheck)
 	return false;
 }
 
+void UInventoryComponent::SwapItem(UItem* PreviousItem, int newIndex)
+{
+	Multi_SwapItem(PreviousItem, newIndex);
+}
+
+void UInventoryComponent::Multi_SwapItem_Implementation(UItem* PreviousItem, int newIndex)
+{
+	const int previousIndex = PreviousItem->ItemIndex;
+	UItem* newItem = M_Items[newIndex];
+
+	// Previous Item
+	M_Items[previousIndex] = newItem;
+	M_Items[previousIndex]->ItemIndex = previousIndex;
+	
+	M_Items[newIndex] = PreviousItem;
+	M_Items[newIndex]->ItemIndex = newIndex;
+
+	OnInventoryUpdated.Broadcast();
+}
+
 void UInventoryComponent::RemoveItem(UItem* ItemToRemove, int ItemIndex)
 {
 	Multi_RemoveItem(ItemToRemove, ItemIndex);
