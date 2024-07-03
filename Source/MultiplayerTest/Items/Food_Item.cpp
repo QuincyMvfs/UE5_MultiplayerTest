@@ -25,7 +25,7 @@ void UFood_Item::Server_HealPlayer_Implementation(UHealthComponent* PlayerHealth
 		UE_LOG(LogTemp, Warning, TEXT("HEAL ME!!"));
 		if (OwningInventory)
 		{
-			OwningInventory->RemoveItem(this);
+			OwningInventory->RemoveItem(this, this->ItemIndex);
 		}
 	}
 }

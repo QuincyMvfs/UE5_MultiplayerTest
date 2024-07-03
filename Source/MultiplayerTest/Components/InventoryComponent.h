@@ -21,27 +21,47 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	
-	void AddItem(UItem* ItemToAdd);
+	UFUNCTION(BlueprintCallable)
+	void AddItem(UItem* ItemToAdd, int ItemIndex);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multi_AddItem(UItem* ItemToAdd);
-	void Multi_AddItem_Implementation(UItem* ItemToAdd);
-	
-	void RemoveItem(UItem* ItemToRemove);
+	void Multi_AddItem(UItem* ItemToAdd, int ItemIndex);
+	void Multi_AddItem_Implementation(UItem* ItemToAdd, int ItemIndex);
+
+	void CreateBaseItem(UItem* ItemToAdd, int ItemIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_CreateBaseItem(UItem* ItemToAdd, int ItemIndex);
+	void Multi_CreateBaseItem_Implementation(UItem* ItemToAdd, int ItemIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void MoveItem(UItem* ItemToAdd, int ItemIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_MoveItem(UItem* ItemToAdd, int ItemIndex);
+	void Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveItem(UItem* ItemToRemove, int ItemIndex);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Multi_RemoveItem(UItem* ItemToRemove);
-	void Multi_RemoveItem_Implementation(UItem* ItemToRemove);
+	void Multi_RemoveItem(UItem* ItemToRemove, int ItemIndex);
+	void Multi_RemoveItem_Implementation(UItem* ItemToRemove, int ItemIndex);
 
 	UPROPERTY(EditDefaultsOnly, Instanced)
 	TArray<UItem*> M_DefaultItems;
 
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Inventory", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Weapon Variables")
+	TSubclassOf<UItem> M_BlankItem;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Inventory", Replicated)
 	int32 M_Capacity;
 
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	int m_currentAmountOfItems = 0;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", Replicated)
 	TArray<UItem*> M_Items;
@@ -52,4 +72,5 @@ protected:
 
 private:
 	bool CanStack(UItem* ItemToCheck);
+	int startingIndex = 0;
 };

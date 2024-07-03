@@ -9,7 +9,6 @@
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
-	M_Capacity = 20;
 }
 
 // Called when the game starts
@@ -17,9 +16,19 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	startingIndex = 0;
+	while (startingIndex < M_Capacity)
+	{
+		CreateBaseItem(M_BlankItem.GetDefaultObject(), startingIndex);
+		startingIndex++;
+
+	}
+
+	startingIndex = 0;
 	for (UItem* item : M_DefaultItems)
 	{
-		AddItem(item);
+		AddItem(item, startingIndex);
+		startingIndex++;
 	}
 }
 
@@ -28,36 +37,83 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UInventoryComponent, M_Items);
 	DOREPLIFETIME(UInventoryComponent, M_Capacity);
+	DOREPLIFETIME(UInventoryComponent, m_currentAmountOfItems);
 
 }
 
-void UInventoryComponent::AddItem(UItem* ItemToAdd)
+// ADD ITEM
+void UInventoryComponent::AddItem(UItem* ItemToAdd, int ItemIndex)
 {
-	Multi_AddItem(ItemToAdd);
+	Multi_AddItem(ItemToAdd, ItemIndex);
 }
 
-void UInventoryComponent::Multi_AddItem_Implementation(UItem* ItemToAdd)
+void UInventoryComponent::Multi_AddItem_Implementation(UItem* ItemToAdd, int ItemIndex)
 {
-	if (M_Items.Num() >= M_Capacity || !ItemToAdd) { return; }
+	UE_LOG(LogTemp, Warning, TEXT("%d / %d | Large = %d"), m_currentAmountOfItems, M_Capacity, m_currentAmountOfItems <= M_Capacity);
+	if (m_currentAmountOfItems >= M_Capacity && ItemToAdd->OwningInventory != this || !ItemToAdd) { return; }
 
+	UE_LOG(LogTemp, Warning, TEXT("PASSED!!"));
+
+	// If item is stackable, check if it can stack, if it cant, add it to the item array
 	if (ItemToAdd->ItemInfo.IsStackable)
 	{
 		if (!CanStack(ItemToAdd))
 		{
 			ItemToAdd->OwningInventory = this;
 			ItemToAdd->World = GetWorld();
-			M_Items.Add(ItemToAdd);
+			ItemToAdd->ItemIndex = ItemIndex;
+
+			M_Items[ItemIndex] = ItemToAdd;
+			m_currentAmountOfItems++;
+			//M_Items.Add(ItemToAdd);
 		}
 	}
 	else
 	{
 		ItemToAdd->OwningInventory = this;
 		ItemToAdd->World = GetWorld();
-		M_Items.Add(ItemToAdd);
+		ItemToAdd->ItemIndex = ItemIndex;
+
+		M_Items[ItemIndex] = ItemToAdd;
+		m_currentAmountOfItems++;
+		//M_Items.Add(ItemToAdd);
 	}
 	
 	OnInventoryUpdated.Broadcast();
 }
+//
+
+// CREATE BASE ITEM
+void UInventoryComponent::CreateBaseItem(UItem* ItemToAdd, int ItemIndex)
+{
+	Multi_CreateBaseItem(ItemToAdd, ItemIndex);
+}
+
+void UInventoryComponent::Multi_CreateBaseItem_Implementation(UItem* ItemToAdd, int ItemIndex)
+{
+	ItemToAdd->ItemIndex = ItemIndex;
+	ItemToAdd->OwningInventory = this;
+	M_Items.Add(ItemToAdd);
+}
+//
+
+// MOVE ITEM
+void UInventoryComponent::MoveItem(UItem* ItemToAdd, int ItemIndex)
+{
+	Multi_MoveItem(ItemToAdd, ItemIndex);
+}
+
+void UInventoryComponent::Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex)
+{
+	M_Items[ItemToAdd->ItemIndex] = M_BlankItem.GetDefaultObject();
+	
+	ItemToAdd->OwningInventory = this;
+	ItemToAdd->ItemIndex = ItemIndex;
+	M_Items[ItemIndex] = ItemToAdd;
+
+	OnInventoryUpdated.Broadcast();
+}
+//
 
 bool UInventoryComponent::CanStack(UItem* ItemToCheck)
 {
@@ -66,7 +122,7 @@ bool UInventoryComponent::CanStack(UItem* ItemToCheck)
 		if (item->ItemInfo.ItemName.ToString() == ItemToCheck->ItemInfo.ItemName.ToString())
 		{
 			item->ItemInfo.Quantity += ItemToCheck->ItemInfo.Quantity;
-			UE_LOG(LogTemp, Warning, TEXT("Contains"));
+			startingIndex--;
 			return true;
 		}
 	}
@@ -74,18 +130,19 @@ bool UInventoryComponent::CanStack(UItem* ItemToCheck)
 	return false;
 }
 
-void UInventoryComponent::RemoveItem(UItem* ItemToRemove)
+void UInventoryComponent::RemoveItem(UItem* ItemToRemove, int ItemIndex)
 {
-	Multi_RemoveItem(ItemToRemove);
+	Multi_RemoveItem(ItemToRemove, ItemIndex);
 }
 
-void UInventoryComponent::Multi_RemoveItem_Implementation(UItem* ItemToRemove)
+void UInventoryComponent::Multi_RemoveItem_Implementation(UItem* ItemToRemove, int ItemIndex)
 {
 	if (!ItemToRemove) { return; }
-	
-	ItemToRemove->OwningInventory = nullptr;
-	ItemToRemove->World = nullptr;
-	M_Items.RemoveSingle(ItemToRemove);
+
+	m_currentAmountOfItems--;
+	ItemToRemove->OwningInventory = this;
+	ItemToRemove->World = GetWorld();
+	M_Items[ItemToRemove->ItemIndex] = M_BlankItem.GetDefaultObject();
 	
 	OnInventoryUpdated.Broadcast();
 }

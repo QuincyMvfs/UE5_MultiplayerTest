@@ -25,6 +25,9 @@ public:
 	UPROPERTY(Transient)
 	UWorld* World;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Items)
+	int ItemIndex;
+	
 	virtual void Use(AGameplayActor* OwningCharacter);
 
 	UFUNCTION(BlueprintImplementableEvent)
