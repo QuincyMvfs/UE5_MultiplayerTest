@@ -139,13 +139,18 @@ void UInventoryComponent::Multi_SwapItem_Implementation(UItem* PreviousItem, int
 {
 	const int previousIndex = PreviousItem->ItemIndex;
 	UItem* newItem = M_Items[newIndex];
+	UInventoryComponent* previousInventory = M_Items[previousIndex]->OwningInventory;
+	UInventoryComponent* newInventory = M_Items[newIndex]->OwningInventory;
 
 	// Previous Item
 	M_Items[previousIndex] = newItem;
 	M_Items[previousIndex]->ItemIndex = previousIndex;
-	
+	M_Items[previousIndex]->OwningInventory = newInventory;
+
+	// New Item
 	M_Items[newIndex] = PreviousItem;
 	M_Items[newIndex]->ItemIndex = newIndex;
+	M_Items[newIndex]->OwningInventory = previousInventory;
 
 	OnInventoryUpdated.Broadcast();
 }
