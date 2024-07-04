@@ -181,8 +181,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool M_IsInventoryOpen = false;
 	
-private:
+public:
+	UFUNCTION(BlueprintCallable)
 	void ToggleInputModePause(TSubclassOf<UUserWidget> WidgetToCreate, bool PauseGame);
+	
 
 };
 
