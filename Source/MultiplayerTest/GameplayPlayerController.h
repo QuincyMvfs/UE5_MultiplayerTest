@@ -69,6 +69,9 @@ class MULTIPLAYERTEST_API AGameplayPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_ReloadInputAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
+	UInputAction* M_InteractInputAction;
+	
 	// UI
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* M_ToggleScoreboardInputAction;
@@ -143,6 +146,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleInputMode(bool IsUIMode);
+
+	UFUNCTION(BlueprintCallable)
+	void Interact();
 
 	UFUNCTION(BlueprintCallable)
 	UUserWidget* GetWidgetUnderCursor();

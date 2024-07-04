@@ -88,6 +88,9 @@ void AGameplayPlayerController::SetupInputComponent()
 			EnhancedInputComponent->BindAction(M_ReloadInputAction, ETriggerEvent::Started,
 				this, &AGameplayPlayerController::Reload);
 
+			EnhancedInputComponent->BindAction(M_InteractInputAction, ETriggerEvent::Started,
+				this, &AGameplayPlayerController::Interact);
+			
 			// Scoreboard
 			EnhancedInputComponent->BindAction(M_ToggleScoreboardInputAction, ETriggerEvent::Started,
 				this, &AGameplayPlayerController::ScoreboardEnable);
@@ -174,6 +177,11 @@ void AGameplayPlayerController::Aim(const FInputActionValue& Value)
 void AGameplayPlayerController::Reload(const FInputActionValue& Value)
 {
 	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->Reload();
+}
+
+void AGameplayPlayerController::Interact()
+{
+	if (M_PossessedPawn && !M_IsPaused) M_PossessedPawn->Interact();
 }
 
 //* Scoreboard

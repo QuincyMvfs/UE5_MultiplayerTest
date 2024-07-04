@@ -3,6 +3,7 @@
 
 #include "GameplayActor.h"
 
+#include "AssetTypeCategories.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -18,6 +19,7 @@
 #include "MultiplayerTest/Components/HealthComponent.h"
 #include "MultiplayerTest/Components/InventoryComponent.h"
 #include "MultiplayerTest/Components/VFXReplicationComponent.h"
+#include "MultiplayerTest/Interfaces/Interactable.h"
 #include "MultiplayerTest/Items/Item.h"
 #include "Net/UnrealNetwork.h"
 
@@ -395,6 +397,39 @@ void AGameplayActor::Server_UseItem_Implementation(UItem* Item)
 	{
 		Item->Use(this);
 		Item->OnUse(this);
+	}
+}
+
+void AGameplayActor::Interact()
+{
+	Server_Interact();
+}
+
+void AGameplayActor::Server_Interact_Implementation()
+{
+	Multi_Interact();
+}
+
+void AGameplayActor::Multi_Interact_Implementation()
+{
+	const FVector StartPosition = GetActorLocation();
+	const FVector EndPosition = StartPosition;
+	const float Radius = 100.0f;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	FHitResult HitResult;
+
+	if (bool isHit = GetWorld()->SweepSingleByChannel(
+		HitResult, StartPosition, EndPosition, FQuat::Identity, ECC_Visibility,
+		FCollisionShape::MakeSphere(Radius), CollisionParams))
+	{
+		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(GetController());
+			IInteractable::Execute_Interact(HitResult.GetActor(), PlayerController, this);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
+	FString::Printf(TEXT("INTERACT MAYBE")));
+		}
 	}
 }
 

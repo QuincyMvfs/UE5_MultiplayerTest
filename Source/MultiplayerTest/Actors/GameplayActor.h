@@ -165,6 +165,17 @@ public:
 	void Server_UseItem(UItem* Item);
 	void Server_UseItem_Implementation(UItem* Item);
 
+	UFUNCTION(BlueprintCallable)
+	void Interact();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Interact();
+	void Server_Interact_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_Interact();
+	void Multi_Interact_Implementation();
+
 	UFUNCTION()
 	void Respawn();
 	
