@@ -3,11 +3,9 @@
 
 #include "GameplayActor.h"
 
-#include "AssetTypeCategories.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTest/EMovementStates.h"
 #include "MultiplayerTest/GameplayPlayerController.h"
