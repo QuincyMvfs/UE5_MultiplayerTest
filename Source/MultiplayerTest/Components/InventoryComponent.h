@@ -35,18 +35,18 @@ public:
 	void Multi_CreateBaseItem_Implementation(UItem* ItemToAdd, int ItemIndex);
 
 	UFUNCTION(BlueprintCallable)
-	void MoveItem(UItem* ItemToAdd, int ItemIndex);
+	void MoveItem(UItem* ItemToAdd, int ItemIndex, UInventoryComponent* NewOwner);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multi_MoveItem(UItem* ItemToAdd, int ItemIndex);
-	void Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex);
+	void Multi_MoveItem(UItem* ItemToAdd, int ItemIndex, UInventoryComponent* NewOwner);
+	void Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex, UInventoryComponent* NewOwner);
 
 	UFUNCTION(BlueprintCallable)
-	void SwapItem(UItem* PreviousItem, int newIndex);
+	void SwapItem(UItem* PreviousItem, int newIndex, UInventoryComponent* NewOwner);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multi_SwapItem(UItem* PreviousItem, int newIndex);
-	void Multi_SwapItem_Implementation(UItem* PreviousItem, int newIndex);
+	void Multi_SwapItem(UItem* PreviousItem, int newIndex, UInventoryComponent* NewOwner);
+	void Multi_SwapItem_Implementation(UItem* PreviousItem, int newIndex, UInventoryComponent* NewOwner);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveItem(UItem* ItemToRemove, int ItemIndex);

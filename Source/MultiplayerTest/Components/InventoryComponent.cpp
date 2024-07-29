@@ -98,20 +98,21 @@ void UInventoryComponent::Multi_CreateBaseItem_Implementation(UItem* ItemToAdd, 
 //
 
 // MOVE ITEM
-void UInventoryComponent::MoveItem(UItem* ItemToAdd, int ItemIndex)
+void UInventoryComponent::MoveItem(UItem* ItemToAdd, int ItemIndex, UInventoryComponent* NewOwner)
 {
-	Multi_MoveItem(ItemToAdd, ItemIndex);
+	Multi_MoveItem(ItemToAdd, ItemIndex, NewOwner);
 }
 
-void UInventoryComponent::Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex)
+void UInventoryComponent::Multi_MoveItem_Implementation(UItem* ItemToAdd, int ItemIndex, UInventoryComponent* NewOwner)
 {
-	M_Items[ItemToAdd->ItemIndex] = M_BlankItem.GetDefaultObject();
+	ItemToAdd->OwningInventory->M_Items[ItemToAdd->ItemIndex] = M_BlankItem.GetDefaultObject();
 	
-	ItemToAdd->OwningInventory = this;
+	ItemToAdd->OwningInventory = NewOwner;
 	ItemToAdd->ItemIndex = ItemIndex;
-	M_Items[ItemIndex] = ItemToAdd;
+	NewOwner->M_Items[ItemIndex] = ItemToAdd;
 
 	OnInventoryUpdated.Broadcast();
+	NewOwner->OnInventoryUpdated.Broadcast();
 }
 //
 
@@ -130,27 +131,28 @@ bool UInventoryComponent::CanStack(UItem* ItemToCheck)
 	return false;
 }
 
-void UInventoryComponent::SwapItem(UItem* PreviousItem, int newIndex)
+void UInventoryComponent::SwapItem(UItem* PreviousItem, int newIndex, UInventoryComponent* NewOwner)
 {
-	Multi_SwapItem(PreviousItem, newIndex);
+	Multi_SwapItem(PreviousItem, newIndex, NewOwner);
 }
 
-void UInventoryComponent::Multi_SwapItem_Implementation(UItem* PreviousItem, int newIndex)
+void UInventoryComponent::Multi_SwapItem_Implementation(UItem* PreviousItem, int newIndex, UInventoryComponent* NewOwner)
 {
 	const int previousIndex = PreviousItem->ItemIndex;
-	UItem* newItem = M_Items[newIndex];
-	UInventoryComponent* previousInventory = M_Items[previousIndex]->OwningInventory;
-	UInventoryComponent* newInventory = M_Items[newIndex]->OwningInventory;
+	UItem* newItem = NewOwner->M_Items[newIndex];
+	UInventoryComponent* previousInventory = PreviousItem->OwningInventory;
 
 	// Previous Item
-	M_Items[previousIndex] = newItem;
-	M_Items[previousIndex]->ItemIndex = previousIndex;
-	M_Items[previousIndex]->OwningInventory = newInventory;
+	previousInventory->M_Items[previousIndex] = M_BlankItem.GetDefaultObject();
+	previousInventory->M_Items[previousIndex] = newItem;
+	previousInventory->M_Items[previousIndex]->ItemIndex = previousIndex;
+	previousInventory->M_Items[previousIndex]->OwningInventory = previousInventory;
 
 	// New Item
-	M_Items[newIndex] = PreviousItem;
-	M_Items[newIndex]->ItemIndex = newIndex;
-	M_Items[newIndex]->OwningInventory = previousInventory;
+	NewOwner->M_Items[newIndex] = M_BlankItem.GetDefaultObject();
+	NewOwner->M_Items[newIndex] = PreviousItem;
+	NewOwner->M_Items[newIndex]->ItemIndex = newIndex;
+	NewOwner->M_Items[newIndex]->OwningInventory = NewOwner;
 
 	OnInventoryUpdated.Broadcast();
 }
